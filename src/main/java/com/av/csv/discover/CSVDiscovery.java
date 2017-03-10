@@ -9,9 +9,12 @@ package com.av.csv.discover;
 import static java.util.stream.Collectors.toList;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.IntSummaryStatistics;
@@ -88,7 +91,7 @@ public class CSVDiscovery {
 		
 		LOG.info("Detecting CSV parser configuration for file " + fileName);
 		
-		FileInputStream is = new FileInputStream(fileName);
+		InputStream is = openFile(fileName);
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
 			List<String> lines = reader.lines().limit(1000L).collect(Collectors.toList());
 			if(lines.size() <= 0) {
@@ -183,7 +186,7 @@ public class CSVDiscovery {
 	 * @throws IOException
 	 */
 	public String detectSeparator(String fileName) throws IOException {
-		FileInputStream is = new FileInputStream(fileName);
+		InputStream is = openFile(fileName);
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
 			List<String> lines = reader.lines().limit(100L).collect(Collectors.toList());
 			return detectSeparator(lines);
@@ -212,21 +215,23 @@ public class CSVDiscovery {
 		.findFirst().orElse(new Pair<String, IntSummaryStatistics>()).getLeft();
 	}
 	
-	public static void main(String[] args) throws IOException {
-		
-		String[] fileNames = new String[] {
-				"D:/data/csv/Most_Popular_Baby_Names_by_Sex_and_Mother_s_Ethnic_Group__New_York_City.csv",
-				"D:/data/csv/comptes-administratifs-etats-speciaux-darrondissement.csv",
-				"D:/data/csv/etat-du-personnel.csv",
-				"D:/data/csv/fr-en-reussite-au-baccalaureat-origine-sociale.csv",
-				"D:/data/csv/SampleCSVFile_2kb.csv"
-		};
-		
-		CSVDiscovery discovery = new CSVDiscovery();
-		for(String fileName : fileNames) {
-			discovery.discoverFile(fileName);
+
+	/**
+	 * 
+	 * @param fileName
+	 * @return input stream on the file
+	 * @throws IOException
+	 */
+	public InputStream openFile(String fileName) throws IOException {
+		Path path = Paths.get(fileName);
+		if(Files.exists(path)) {
+			// Standard file
+			return Files.newInputStream(path);
+		} else {
+			// Lookup file in classpath
+			return getClass().getClassLoader().getResourceAsStream(fileName);
 		}
-		
 	}
+
 
 }
