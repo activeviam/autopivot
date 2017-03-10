@@ -1,0 +1,11 @@
+{
+	/** 
+	This file is intentionally left almost empty
+	The captions, formatters,... of English language are defined in the mdx contexts 
+	*/
+
+	"_LEVELS_" : {
+
+		"Branch" : "What-If"
+	}
+}

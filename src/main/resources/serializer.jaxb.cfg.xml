@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+
+<!-- Declare all the JAXB mapping resources needed by the application -->
+<properties>
+	<entry key="Composer">composer-jaxb-mapping.xml</entry>
+	<entry key="Streaming">streaming-jaxb-mapping.xml</entry>
+	<entry key="ActivePivot-Filtering">pivot.filtering-jaxb-mapping.xml</entry>
+	<entry key="ActivePivot-ContextValues">pivot.contextvalues-jaxb-mapping.xml</entry>
+	<entry key="ActivePivot-Definitions">pivot.definitions-jaxb-mapping.xml</entry>
+	<entry key="ActivePivot-Security">pivot.security-jaxb-mapping.xml</entry>
+	<entry key="ActivePivot-Queries">pivot.queries-jaxb-mapping.xml</entry>
+	<entry key="ActivePivot-Streaming">pivot.streaming-jaxb-mapping.xml</entry>
+</properties>
