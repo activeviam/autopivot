@@ -23,6 +23,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.av.csv.CSVFormat;
+import com.av.csv.CSVSplitter;
 import com.quartetfs.fwk.QuartetRuntimeException;
 import com.quartetfs.fwk.Registry;
 import com.quartetfs.fwk.format.IParser;
@@ -35,7 +37,7 @@ public class CSVDiscovery {
 	public static final Logger LOG = Logger.getLogger(CSVDiscovery.class.getName());
 	
 	/** Default list of candidate separators */
-	public static final List<String> DEFAULT_SEPARATORS = Stream.of(";", "	", "\\|", ",").collect(toList());
+	public static final List<String> DEFAULT_SEPARATORS = Stream.of(";", "	", "|", ",").collect(toList());
 	
 	/** Number of rows sampled when detecting the csv separator */
 	public static final int SEPARATOR_DETECTION_SAMPLE = 100;
@@ -74,20 +76,30 @@ public class CSVDiscovery {
 		@SuppressWarnings("rawtypes")
 		IPlugin<IParser> plugin = Registry.getPlugin(IParser.class);
 
-		return Stream.of(
+		return Stream.<IParser<?>>of(
+				plugin.valueOf("int"),
+				plugin.valueOf("long"),
+				plugin.valueOf("double"),
 				plugin.valueOf("DATE[yyyy-MM-dd]"),
 				plugin.valueOf("DATE[yyyy/MM/dd]"),
 				plugin.valueOf("DATE[MM-dd-yyyy]"),
 				plugin.valueOf("DATE[MM/dd/yyyy]"),
 				plugin.valueOf("DATE[dd-MM-yyyy]"),
 				plugin.valueOf("DATE[dd/MM/yyyy]"),
-				plugin.valueOf("int"),
-				plugin.valueOf("double"))
+				plugin.valueOf("DATE[d-MMM-yyyy]"))
 				.collect(toList());
 	}
 
 
-	public CSVDiscoveryResult discoverFile(String fileName) throws IOException {
+	/**
+	 * 
+	 * Discover the CSV format of a CSV file.
+	 * 
+	 * @param fileName
+	 * @return CSV Format
+	 * @throws IOException
+	 */
+	public CSVFormat discoverFile(String fileName) throws IOException {
 		
 		LOG.info("Detecting CSV parser configuration for file " + fileName);
 		
@@ -103,7 +115,7 @@ public class CSVDiscovery {
 			LOG.info("Detected separator: " + separator);
 			
 			// Extract column names from header
-			List<String> headers = Arrays.asList(lines.get(0).split(separator));
+			List<String> headers = Arrays.asList(CSVSplitter.split(lines.get(0), separator));
 			
 			LOG.info("Column names: " + headers);
 			
@@ -118,7 +130,7 @@ public class CSVDiscovery {
 
 			LOG.info("Detected types: " + types);
 			
-			return new CSVDiscoveryResult(separator, headers, types);
+			return new CSVFormat(separator, headers, types);
 		}
 	}
 
@@ -127,7 +139,7 @@ public class CSVDiscovery {
 		
 		List<List<String>> columns = new ArrayList<>();
 		rows.forEach(row -> {
-			String[] fields = row.split(separator);
+			String[] fields = CSVSplitter.split(row, separator);
 			for(int f = 0; f < fields.length; f++) {
 				if(columns.size() <= f) {
 					columns.add(new ArrayList<>());
@@ -205,18 +217,21 @@ public class CSVDiscovery {
 	 */
 	public String detectSeparator(List<String> lines) {
 		return separators.stream()
-		.map(sep -> new Pair<>(sep, lines.stream().collect(Collectors.summarizingInt(s -> s.split(sep).length))))
+		.map(sep -> new Pair<>(sep, lines.stream().collect(Collectors.summarizingInt(s -> CSVSplitter.split(s, sep).length))))
 		.filter(p -> {
 			IntSummaryStatistics stats = p.getRight();
 			return stats.getCount() > 0
 					&& stats.getAverage() >= 2.0
 					&& (stats.getMax() < 2*stats.getAverage());
-		})
+		}).sorted((p1, p2) -> p2.getRight().getMax() - p1.getRight().getMax())
 		.findFirst().orElse(new Pair<String, IntSummaryStatistics>()).getLeft();
 	}
 	
 
 	/**
+	 * 
+	 * Open a file input stream, works if the file is in the
+	 * classpath or in the file system.
 	 * 
 	 * @param fileName
 	 * @return input stream on the file

@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.av.autopivot.AutoDescription;
-import com.av.csv.discover.CSVDiscoveryResult;
+import com.av.csv.CSVFormat;
 import com.qfs.content.cfg.impl.ContentServerRestServicesConfig;
 import com.qfs.content.service.IContentService;
 import com.qfs.pivot.content.IActivePivotContentService;
@@ -69,7 +69,7 @@ public class ContentServiceConfig implements IActivePivotContentServiceConfig {
 
 	public IActivePivotManagerDescription createActivePivotManagerDescription() {
 		
-		CSVDiscoveryResult discovery = sourceConfig.discoverFile();
+		CSVFormat discovery = sourceConfig.discoverFile();
 		
 		ICatalogDescription catalog = new CatalogDescription("AUTOPIVOT_CATALOG", Arrays.asList(AutoDescription.PIVOT));
 		IActivePivotSchemaDescription schema = AutoDescription.createActivePivotSchemaDescription(discovery);

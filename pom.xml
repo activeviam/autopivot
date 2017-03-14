@@ -14,7 +14,8 @@
 	</prerequisites>
 
 	<properties>
-		<activepivot.version>5.5.2-SNAPSHOT</activepivot.version>
+		<activepivot.version>5.5.2</activepivot.version>
+		<activeui.version>4.1.1-20170314</activeui.version>
 		<jetty.version>9.2.20.v20161216</jetty.version>
 	</properties>
 
@@ -77,7 +78,7 @@
 		<dependency>
 			<groupId>com.activeviam.activeui</groupId>
 			<artifactId>activeui</artifactId>
-			<version>4.1.0</version>
+			<version>${activeui.version}</version>
 		</dependency>
 	</dependencies>
 

@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import com.av.csv.discover.CSVDiscoveryResult;
+import com.av.csv.CSVFormat;
 import com.qfs.desc.IFieldDescription;
 import com.qfs.desc.IOptimizationDescription;
 import com.qfs.desc.IOptimizationDescription.Optimization;
@@ -63,7 +63,7 @@ public class AutoDescription {
 	 * @param discovery
 	 * @return store description
 	 */
-	public static IStoreDescription createStoreDescription(CSVDiscoveryResult discovery) {
+	public static IStoreDescription createStoreDescription(CSVFormat discovery) {
 
 		List<IFieldDescription> fields = new ArrayList<>();
 		List<IOptimizationDescription> optimizations = new ArrayList<>();
@@ -112,7 +112,7 @@ public class AutoDescription {
 	}
 	
 	
-	public static IActivePivotDescription createActivePivotDescription(CSVDiscoveryResult discovery) {
+	public static IActivePivotDescription createActivePivotDescription(CSVFormat discovery) {
 		
 		ActivePivotDescription desc = new ActivePivotDescription();
 		
@@ -160,7 +160,7 @@ public class AutoDescription {
 		for(int f = 0; f < discovery.getColumnCount(); f++) {
 			String fieldName = discovery.getColumnName(f);
 			String fieldType = discovery.getColumnType(f);
-			if(numerics.contains(fieldType)) {
+			if(numerics.contains(fieldType) && !fieldName.endsWith("id") && !fieldName.endsWith("ID")) {
 				AggregatedMeasureDescription sum = new AggregatedMeasureDescription(fieldName, "SUM");
 				AggregatedMeasureDescription avg = new AggregatedMeasureDescription(fieldName, "AVG");
 				AggregatedMeasureDescription min = new AggregatedMeasureDescription(fieldName, "MIN");
@@ -186,7 +186,7 @@ public class AutoDescription {
 	 * @param storeDesc
 	 * @return schema description
 	 */
-	public static IActivePivotSchemaDescription createActivePivotSchemaDescription(CSVDiscoveryResult discovery) {
+	public static IActivePivotSchemaDescription createActivePivotSchemaDescription(CSVFormat discovery) {
 		ActivePivotSchemaDescription desc = new ActivePivotSchemaDescription();
 
 		// Datastore selection

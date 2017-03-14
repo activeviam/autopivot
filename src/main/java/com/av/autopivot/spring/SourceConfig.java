@@ -26,7 +26,7 @@ import com.av.csv.calculator.DateDayCalculator;
 import com.av.csv.calculator.DateMonthCalculator;
 import com.av.csv.calculator.DateYearCalculator;
 import com.av.csv.discover.CSVDiscovery;
-import com.av.csv.discover.CSVDiscoveryResult;
+import com.av.csv.CSVFormat;
 import com.qfs.msg.IColumnCalculator;
 import com.qfs.msg.csv.ICSVSource;
 import com.qfs.msg.csv.ICSVSourceConfiguration;
@@ -82,10 +82,10 @@ public class SourceConfig {
 	
 	/** Discover the input data file (CSV separator, column types) */
 	@Bean
-	public CSVDiscoveryResult discoverFile() {
+	public CSVFormat discoverFile() {
 		String fileName = env.getRequiredProperty("fileName");
 		try {
-			CSVDiscoveryResult discovery = new CSVDiscovery().discoverFile(fileName);
+			CSVFormat discovery = new CSVDiscovery().discoverFile(fileName);
 			return discovery;
 		} catch(Exception e) {
 			throw new QuartetRuntimeException("Could not discover csv file: " + fileName , e);
@@ -98,7 +98,7 @@ public class SourceConfig {
 	@Bean
 	public Void loadData(ICSVSource<Path> source) throws Exception {
 		
-		CSVDiscoveryResult discovery = discoverFile();
+		CSVFormat discovery = discoverFile();
 		
 		// Create parser configuration
 		CSVParserConfiguration configuration = new CSVParserConfiguration(

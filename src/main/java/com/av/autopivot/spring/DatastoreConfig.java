@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 import com.av.autopivot.AutoDescription;
-import com.av.csv.discover.CSVDiscoveryResult;
+import com.av.csv.CSVFormat;
 import com.qfs.desc.IDatastoreSchemaDescription;
 import com.qfs.desc.IReferenceDescription;
 import com.qfs.desc.IStoreDescription;
@@ -75,7 +75,7 @@ public class DatastoreConfig implements IDatastoreConfig {
 	 */
 	@Bean
 	public IDatastoreSchemaDescription schemaDescription() throws IOException {
-		CSVDiscoveryResult discovery = sourceConfig.discoverFile();
+		CSVFormat discovery = sourceConfig.discoverFile();
 		
 		final Collection<IStoreDescription> stores = new LinkedList<>();
 		stores.add(AutoDescription.createStoreDescription(discovery));
