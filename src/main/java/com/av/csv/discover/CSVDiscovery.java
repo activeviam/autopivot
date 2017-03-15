@@ -86,7 +86,8 @@ public class CSVDiscovery {
 				plugin.valueOf("DATE[MM/dd/yyyy]"),
 				plugin.valueOf("DATE[dd-MM-yyyy]"),
 				plugin.valueOf("DATE[dd/MM/yyyy]"),
-				plugin.valueOf("DATE[d-MMM-yyyy]"))
+				plugin.valueOf("DATE[d-MMM-yyyy]"),
+				plugin.valueOf("DATE[EEE MMM dd HH:mm:ss zzz yyyy]"))
 				.collect(toList());
 	}
 
@@ -238,14 +239,22 @@ public class CSVDiscovery {
 	 * @throws IOException
 	 */
 	public InputStream openFile(String fileName) throws IOException {
+		InputStream is;
+		
 		Path path = Paths.get(fileName);
 		if(Files.exists(path)) {
 			// Standard file
-			return Files.newInputStream(path);
+			is = Files.newInputStream(path);
 		} else {
 			// Lookup file in classpath
-			return getClass().getClassLoader().getResourceAsStream(fileName);
+			is = getClass().getClassLoader().getResourceAsStream(fileName);
 		}
+		
+		if(null == is) {
+			throw new IOException("File not found: " + fileName);
+		}
+		
+		return is;
 	}
 
 

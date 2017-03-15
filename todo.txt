@@ -1,5 +1,3 @@
 Escape or replace reserved characters in headers (member unique names)
 Charset configuration
 Declare date hierarchies when detected
-Year / Month / Day levels automatically for date hierarchies
-ActiveUI

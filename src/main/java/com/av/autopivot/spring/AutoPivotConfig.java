@@ -63,7 +63,7 @@ import com.quartetfs.fwk.contributions.impl.ClasspathContributionProvider;
  *
  * @author Quartet FS
  */
-@PropertySource(value = { "classpath:jwt.properties" })
+@PropertySource(value = { "classpath:jwt.properties", "classpath:export.properties" })
 @Configuration
 @Import(
 value = {
