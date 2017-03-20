@@ -21,11 +21,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 
-import com.av.autopivot.AutoDescription;
 import com.av.csv.calculator.DateDayCalculator;
 import com.av.csv.calculator.DateMonthCalculator;
 import com.av.csv.calculator.DateYearCalculator;
 import com.av.csv.discover.CSVDiscovery;
+import com.av.autopivot.AutoPivotGenerator;
 import com.av.csv.CSVFormat;
 import com.qfs.msg.IColumnCalculator;
 import com.qfs.msg.csv.ICSVSource;
@@ -91,7 +91,8 @@ public class SourceConfig {
 			throw new QuartetRuntimeException("Could not discover csv file: " + fileName , e);
 		}
 	}
-	
+
+
 	/**
 	 * Load the CSV file
 	 */
@@ -110,7 +111,7 @@ public class SourceConfig {
 				CSVParserConfiguration.toMap(discovery.getColumnNames()));
 		
 		String fileName = env.getRequiredProperty("fileName");
-		SingleFileCSVTopic topic = new SingleFileCSVTopic(AutoDescription.BASE_STORE, configuration, fileName, 1000);
+		SingleFileCSVTopic topic = new SingleFileCSVTopic(AutoPivotGenerator.BASE_STORE, configuration, fileName, 1000);
 		source.addTopic(topic);
 		
 		CSVMessageChannelFactory<Path> channelFactory = new CSVMessageChannelFactory<>(source, datastoreConfig.datastore());
@@ -130,7 +131,7 @@ public class SourceConfig {
 			}
 			
 		};
-		channelFactory.setCalculatedColumns(AutoDescription.BASE_STORE, calculatedColumns);
+		channelFactory.setCalculatedColumns(AutoPivotGenerator.BASE_STORE, calculatedColumns);
 		
 		
 		Fetch<IFileInfo<Path>, ILineReader> fetch = new Fetch<IFileInfo<Path>, ILineReader>(channelFactory);

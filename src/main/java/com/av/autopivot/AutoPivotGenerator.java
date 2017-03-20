@@ -20,6 +20,10 @@ import com.qfs.desc.IStoreDescription;
 import com.qfs.desc.impl.FieldDescription;
 import com.qfs.desc.impl.OptimizationDescription;
 import com.qfs.desc.impl.StoreDescription;
+import com.qfs.platform.IPlatform;
+import com.qfs.store.part.IPartitioningDescription;
+import com.qfs.store.part.impl.PartitioningDescription;
+import com.qfs.store.part.impl.PartitioningUtil;
 import com.qfs.store.selection.ISelectionField;
 import com.qfs.store.selection.impl.SelectionField;
 import com.qfs.util.impl.QfsArrays;
@@ -28,19 +32,25 @@ import com.quartetfs.biz.pivot.cube.hierarchy.ILevelInfo.LevelType;
 import com.quartetfs.biz.pivot.cube.hierarchy.measures.IMeasureHierarchy;
 import com.quartetfs.biz.pivot.definitions.IActivePivotDescription;
 import com.quartetfs.biz.pivot.definitions.IActivePivotInstanceDescription;
+import com.quartetfs.biz.pivot.definitions.IActivePivotManagerDescription;
 import com.quartetfs.biz.pivot.definitions.IActivePivotSchemaDescription;
+import com.quartetfs.biz.pivot.definitions.IActivePivotSchemaInstanceDescription;
 import com.quartetfs.biz.pivot.definitions.IAggregatedMeasureDescription;
 import com.quartetfs.biz.pivot.definitions.IAxisHierarchyDescription;
 import com.quartetfs.biz.pivot.definitions.IAxisLevelDescription;
+import com.quartetfs.biz.pivot.definitions.ICatalogDescription;
 import com.quartetfs.biz.pivot.definitions.INativeMeasureDescription;
 import com.quartetfs.biz.pivot.definitions.impl.ActivePivotDescription;
 import com.quartetfs.biz.pivot.definitions.impl.ActivePivotInstanceDescription;
+import com.quartetfs.biz.pivot.definitions.impl.ActivePivotManagerDescription;
 import com.quartetfs.biz.pivot.definitions.impl.ActivePivotSchemaDescription;
+import com.quartetfs.biz.pivot.definitions.impl.ActivePivotSchemaInstanceDescription;
 import com.quartetfs.biz.pivot.definitions.impl.AggregatedMeasureDescription;
 import com.quartetfs.biz.pivot.definitions.impl.AxisDimensionDescription;
 import com.quartetfs.biz.pivot.definitions.impl.AxisDimensionsDescription;
 import com.quartetfs.biz.pivot.definitions.impl.AxisHierarchyDescription;
 import com.quartetfs.biz.pivot.definitions.impl.AxisLevelDescription;
+import com.quartetfs.biz.pivot.definitions.impl.CatalogDescription;
 import com.quartetfs.biz.pivot.definitions.impl.MeasuresDescription;
 import com.quartetfs.biz.pivot.definitions.impl.NativeMeasureDescription;
 import com.quartetfs.biz.pivot.definitions.impl.SelectionDescription;
@@ -53,7 +63,7 @@ import com.quartetfs.biz.pivot.definitions.impl.SelectionDescription;
  * @author ActiveViam
  *
  */
-public class AutoDescription {
+public class AutoPivotGenerator {
 
 	/** Default name of the base store */
 	public static final String BASE_STORE = "DATA";
@@ -72,7 +82,7 @@ public class AutoDescription {
 	
 	/** Default format for time levels */
 	public static final String TIME_FORMAT = "DATE[HH:mm:ss]";	
-	
+
 	/**
 	 * 
 	 * Generate a store description based on the discovery of the input data.
@@ -80,7 +90,7 @@ public class AutoDescription {
 	 * @param format
 	 * @return store description
 	 */
-	public static IStoreDescription createStoreDescription(CSVFormat format) {
+	public IStoreDescription createStoreDescription(CSVFormat format) {
 
 		List<IFieldDescription> fields = new ArrayList<>();
 		List<IOptimizationDescription> optimizations = new ArrayList<>();
@@ -98,7 +108,7 @@ public class AutoDescription {
 				optimizations.add(new OptimizationDescription(month.getName(), Optimization.DICTIONARY));
 				FieldDescription day = new FieldDescription(columnName + ".DAY", "int");
 				optimizations.add(new OptimizationDescription(day.getName(), Optimization.DICTIONARY));
-
+				
 				fields.add(year);
 				fields.add(month);
 				fields.add(day);
@@ -115,18 +125,55 @@ public class AutoDescription {
 			fields.add(desc);
 		}
 
+		// Partitioning
+		IPartitioningDescription partitioning = createPartitioningDescription(format);
+		
 		@SuppressWarnings("unchecked")
 		StoreDescription desc = new StoreDescription(
 				BASE_STORE,
 				Collections.EMPTY_LIST,
 				fields,
 				"COLUMN",
-				null,
+				partitioning,
 				optimizations,
 				false);
-		
+
 		return desc;
 	}
+	
+	
+	/**
+	 * 
+	 * Automatically configure the partitioning of the datastore.
+	 * The first non floating point field is used as the partitioning
+	 * field, and the number of partitions is half the number
+	 * of cores.
+	 * 
+	 * @param format
+	 * @return partitioning description
+	 */
+	public IPartitioningDescription createPartitioningDescription(CSVFormat format) {
+		
+		int processorCount = IPlatform.CURRENT_PLATFORM.getProcessorCount();
+		int partitionCount = processorCount/2;
+		if(partitionCount > 1) {
+
+			for(int c = 0; c < format.getColumnCount(); c++) {
+				String fieldName = format.getColumnName(c);
+				String fieldType = format.getColumnType(c);
+				
+				if(!"float".equalsIgnoreCase(fieldType) && !"double".equalsIgnoreCase(fieldType)) {
+					PartitioningDescription desc = new PartitioningDescription();
+					desc.addPartitioning(fieldName, new PartitioningUtil.ModuloFunction(partitionCount));
+					return desc;
+				}
+			}
+
+		}
+		
+		return null;
+	}
+	
 	
 	
 	/**
@@ -137,7 +184,7 @@ public class AutoDescription {
 	 * @param format
 	 * @return AcivePivot description
 	 */
-	public static IActivePivotDescription createActivePivotDescription(CSVFormat format) {
+	public IActivePivotDescription createActivePivotDescription(CSVFormat format) {
 		
 		ActivePivotDescription desc = new ActivePivotDescription();
 		
@@ -241,7 +288,7 @@ public class AutoDescription {
 	 * @param storeDesc
 	 * @return schema description
 	 */
-	public static IActivePivotSchemaDescription createActivePivotSchemaDescription(CSVFormat format) {
+	public IActivePivotSchemaDescription createActivePivotSchemaDescription(CSVFormat format) {
 		ActivePivotSchemaDescription desc = new ActivePivotSchemaDescription();
 
 		// Datastore selection
@@ -266,6 +313,27 @@ public class AutoDescription {
 		desc.setDatastoreSelection(selection);
 		desc.setActivePivotInstanceDescriptions(Collections.singletonList(instance));
 		
+		return desc;
+	}
+	
+	
+	/**
+	 * 
+	 * Generate a complete ActivePivot Manager description, with one catalog,
+	 * one schema and one cube, based on the provided input data format.
+	 * 
+	 * @param format input data format
+	 * @return ActivePivot Manager description
+	 */
+	public IActivePivotManagerDescription createActivePivotManagerDescription(CSVFormat format) {
+		
+		ICatalogDescription catalog = new CatalogDescription(PIVOT + "_CATALOG", Arrays.asList(PIVOT));
+		IActivePivotSchemaDescription schema = createActivePivotSchemaDescription(format);
+		IActivePivotSchemaInstanceDescription instance = new ActivePivotSchemaInstanceDescription(PIVOT + "_SCHEMA", schema);
+		
+		ActivePivotManagerDescription desc = new ActivePivotManagerDescription();
+		desc.setCatalogs(Arrays.asList(catalog));
+		desc.setSchemas(Arrays.asList(instance));
 		return desc;
 	}
 	

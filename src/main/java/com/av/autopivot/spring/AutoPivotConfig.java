@@ -97,9 +97,9 @@ public class AutoPivotConfig {
 	/** Logger **/
 	protected static Logger LOGGER = Logger.getLogger(AutoPivotConfig.class.getName());
 
-	/** Before anything else we statically initialize the Quartet FS Registry. */
+	/** Before anything else we statically initialise the ActiveViam Registry. */
 	static {
-		Registry.setContributionProvider(new ClasspathContributionProvider("com.qfs", "com.quartetfs"));
+		Registry.setContributionProvider(new ClasspathContributionProvider("com.av", "com.qfs", "com.quartetfs"));
 	}
 
 	/** Spring environment, automatically wired */

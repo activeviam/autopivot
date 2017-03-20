@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
-import com.av.autopivot.AutoDescription;
+import com.av.autopivot.AutoPivotGenerator;
 import com.av.csv.CSVFormat;
 import com.qfs.desc.IDatastoreSchemaDescription;
 import com.qfs.desc.IReferenceDescription;
@@ -61,6 +61,18 @@ public class DatastoreConfig implements IDatastoreConfig {
 		return references;
 	}
 
+
+	
+	/**
+	 * 
+	 * Generator of store and cube descriptions.
+	 * 
+	 * @return ActivePivot generator
+	 */
+	@Bean
+	public AutoPivotGenerator generator() {
+		return new AutoPivotGenerator();
+	}
 	
 	/**
 	 *
@@ -76,9 +88,10 @@ public class DatastoreConfig implements IDatastoreConfig {
 	@Bean
 	public IDatastoreSchemaDescription schemaDescription() throws IOException {
 		CSVFormat discovery = sourceConfig.discoverFile();
+		AutoPivotGenerator generator = generator();
 		
 		final Collection<IStoreDescription> stores = new LinkedList<>();
-		stores.add(AutoDescription.createStoreDescription(discovery));
+		stores.add(generator.createStoreDescription(discovery));
 		return new DatastoreSchemaDescription(stores, references());
 	}
 

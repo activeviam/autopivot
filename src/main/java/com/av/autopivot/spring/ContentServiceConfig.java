@@ -6,13 +6,11 @@
  */
 package com.av.autopivot.spring;
 
-import java.util.Arrays;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.av.autopivot.AutoDescription;
+import com.av.autopivot.AutoPivotGenerator;
 import com.av.csv.CSVFormat;
 import com.qfs.content.cfg.impl.ContentServerRestServicesConfig;
 import com.qfs.content.service.IContentService;
@@ -20,12 +18,6 @@ import com.qfs.pivot.content.IActivePivotContentService;
 import com.qfs.pivot.content.impl.ActivePivotContentServiceBuilder;
 import com.qfs.server.cfg.IActivePivotContentServiceConfig;
 import com.quartetfs.biz.pivot.definitions.IActivePivotManagerDescription;
-import com.quartetfs.biz.pivot.definitions.IActivePivotSchemaDescription;
-import com.quartetfs.biz.pivot.definitions.IActivePivotSchemaInstanceDescription;
-import com.quartetfs.biz.pivot.definitions.ICatalogDescription;
-import com.quartetfs.biz.pivot.definitions.impl.ActivePivotManagerDescription;
-import com.quartetfs.biz.pivot.definitions.impl.ActivePivotSchemaInstanceDescription;
-import com.quartetfs.biz.pivot.definitions.impl.CatalogDescription;
 
 /**
  * Spring configuration of the <b>Content Service</b> backed by a local <b>Content Server</b>.
@@ -40,6 +32,11 @@ public class ContentServiceConfig implements IActivePivotContentServiceConfig {
 	/** Datasource configuration */
 	@Autowired
 	protected SourceConfig sourceConfig;
+	
+
+	/** Datastore configuration */
+	@Autowired
+	protected DatastoreConfig datastoreConfig;
 
 	/**
 	 * @return ActivePivot content service used to store context
@@ -49,13 +46,17 @@ public class ContentServiceConfig implements IActivePivotContentServiceConfig {
 	@Override
 	public IActivePivotContentService activePivotContentService() {
 
+		CSVFormat discovery = sourceConfig.discoverFile();
+		AutoPivotGenerator generator = datastoreConfig.generator();
+		
+		IActivePivotManagerDescription manager = generator.createActivePivotManagerDescription(discovery);
+		
 		return new ActivePivotContentServiceBuilder()
 				.withoutPersistence()
 				.withoutCache()
 				.needInitialization("ROLE_USER", "ROLE_USER")
-
-				// Push the context values stored in ROLE-INF
-				.withDescription(createActivePivotManagerDescription())
+				.withDescription(manager)
+				// Push the context values stored in ROLE-INF directory
 				.withContextValues("ROLE-INF")
 				.build();
 	}
@@ -65,20 +66,6 @@ public class ContentServiceConfig implements IActivePivotContentServiceConfig {
 	public IContentService contentService() {
 		// Return the real content service used by the activePivotContentService instead of the wrapped one
 		return activePivotContentService().getContentService().getUnderlying();
-	}
-
-	public IActivePivotManagerDescription createActivePivotManagerDescription() {
-		
-		CSVFormat discovery = sourceConfig.discoverFile();
-		
-		ICatalogDescription catalog = new CatalogDescription("AUTOPIVOT_CATALOG", Arrays.asList(AutoDescription.PIVOT));
-		IActivePivotSchemaDescription schema = AutoDescription.createActivePivotSchemaDescription(discovery);
-		IActivePivotSchemaInstanceDescription instance = new ActivePivotSchemaInstanceDescription("AUTOPIVOT_SCHEMA", schema);
-		
-		ActivePivotManagerDescription desc = new ActivePivotManagerDescription();
-		desc.setCatalogs(Arrays.asList(catalog));
-		desc.setSchemas(Arrays.asList(instance));
-		return desc;
 	}
 
 }
