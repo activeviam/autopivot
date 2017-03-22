@@ -55,9 +55,10 @@ public class SourceConfig {
 	/** Logger **/
 	protected static Logger LOGGER = Logger.getLogger(SourceConfig.class.getName());
 
-	/** Property to identify the name of teh file to load */
+	/** Property to identify the name of the file to load */
 	public static final String FILENAME_PROPERTY = "fileName";
-	
+
+
 	/** Spring environment, automatically wired */
 	@Autowired
 	protected Environment env;

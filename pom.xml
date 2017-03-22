@@ -15,7 +15,7 @@
 
 	<properties>
 		<activepivot.version>5.5.2</activepivot.version>
-		<activeui.version>4.1.1-rc</activeui.version>
+		<activeui.version>4.1.1</activeui.version>
 		<jetty.version>9.2.20.v20161216</jetty.version>
 	</properties>
 
