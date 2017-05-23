@@ -14,9 +14,9 @@
 	</prerequisites>
 
 	<properties>
-		<activepivot.version>5.5.2</activepivot.version>
-		<activeui.version>4.1.1</activeui.version>
-		<jetty.version>9.2.20.v20161216</jetty.version>
+		<activepivot.version>5.5.4</activepivot.version>
+		<activeui.version>4.1.3</activeui.version>
+		<jetty.version>9.2.21.v20170120</jetty.version>
 	</properties>
 
 	<dependencies>

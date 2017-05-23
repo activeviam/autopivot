@@ -1,8 +1,20 @@
-/*
- * (C) ActiveViam 2017
- * ALL RIGHTS RESERVED. This material is the CONFIDENTIAL and PROPRIETARY
- * property of Quartet Financial Systems Limited. Any unauthorized use,
- * reproduction or transfer of this material is strictly prohibited
+/* 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package com.av.autopivot;
 
@@ -11,6 +23,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
+
+import org.springframework.core.env.Environment;
 
 import com.av.csv.CSVFormat;
 import com.qfs.desc.IFieldDescription;
@@ -36,6 +51,7 @@ import com.quartetfs.biz.pivot.definitions.IActivePivotManagerDescription;
 import com.quartetfs.biz.pivot.definitions.IActivePivotSchemaDescription;
 import com.quartetfs.biz.pivot.definitions.IActivePivotSchemaInstanceDescription;
 import com.quartetfs.biz.pivot.definitions.IAggregatedMeasureDescription;
+import com.quartetfs.biz.pivot.definitions.IAggregatesCacheDescription;
 import com.quartetfs.biz.pivot.definitions.IAxisHierarchyDescription;
 import com.quartetfs.biz.pivot.definitions.IAxisLevelDescription;
 import com.quartetfs.biz.pivot.definitions.ICatalogDescription;
@@ -46,6 +62,7 @@ import com.quartetfs.biz.pivot.definitions.impl.ActivePivotManagerDescription;
 import com.quartetfs.biz.pivot.definitions.impl.ActivePivotSchemaDescription;
 import com.quartetfs.biz.pivot.definitions.impl.ActivePivotSchemaInstanceDescription;
 import com.quartetfs.biz.pivot.definitions.impl.AggregatedMeasureDescription;
+import com.quartetfs.biz.pivot.definitions.impl.AggregatesCacheDescription;
 import com.quartetfs.biz.pivot.definitions.impl.AxisDimensionDescription;
 import com.quartetfs.biz.pivot.definitions.impl.AxisDimensionsDescription;
 import com.quartetfs.biz.pivot.definitions.impl.AxisHierarchyDescription;
@@ -65,6 +82,9 @@ import com.quartetfs.biz.pivot.definitions.impl.SelectionDescription;
  */
 public class AutoPivotGenerator {
 
+	/** Logger **/
+	protected static Logger LOGGER = Logger.getLogger(AutoPivotGenerator.class.getName());
+	
 	/** Default name of the base store */
 	public static final String BASE_STORE = "DATA";
 
@@ -184,7 +204,7 @@ public class AutoPivotGenerator {
 	 * @param format
 	 * @return AcivePivot description
 	 */
-	public IActivePivotDescription createActivePivotDescription(CSVFormat format) {
+	public IActivePivotDescription createActivePivotDescription(CSVFormat format, Environment env) {
 		
 		ActivePivotDescription desc = new ActivePivotDescription();
 		
@@ -280,6 +300,15 @@ public class AutoPivotGenerator {
 		
 		desc.setMeasuresDescription(measureDesc);
 		
+		// Aggregate cache configuration
+		if(env.containsProperty("pivot.cache.size")) {
+			Integer cacheSize = env.getProperty("pivot.cache.size", Integer.class);
+			LOGGER.info("Configuring aggregate cache of size " + cacheSize);
+			IAggregatesCacheDescription cacheDescription = new AggregatesCacheDescription();
+			cacheDescription.setSize(cacheSize);
+			desc.setAggregatesCacheDescription(cacheDescription);
+		}
+		
 		return desc;
 	}
 	
@@ -288,7 +317,7 @@ public class AutoPivotGenerator {
 	 * @param storeDesc
 	 * @return schema description
 	 */
-	public IActivePivotSchemaDescription createActivePivotSchemaDescription(CSVFormat format) {
+	public IActivePivotSchemaDescription createActivePivotSchemaDescription(CSVFormat format, Environment env) {
 		ActivePivotSchemaDescription desc = new ActivePivotSchemaDescription();
 
 		// Datastore selection
@@ -307,7 +336,7 @@ public class AutoPivotGenerator {
 		SelectionDescription selection = new SelectionDescription(BASE_STORE, fields);
 		
 		// ActivePivot instance
-		IActivePivotDescription pivot = createActivePivotDescription(format);
+		IActivePivotDescription pivot = createActivePivotDescription(format, env);
 		IActivePivotInstanceDescription instance = new ActivePivotInstanceDescription(PIVOT, pivot);
 		
 		desc.setDatastoreSelection(selection);
@@ -325,10 +354,10 @@ public class AutoPivotGenerator {
 	 * @param format input data format
 	 * @return ActivePivot Manager description
 	 */
-	public IActivePivotManagerDescription createActivePivotManagerDescription(CSVFormat format) {
-		
+	public IActivePivotManagerDescription createActivePivotManagerDescription(CSVFormat format, Environment env) {
+
 		ICatalogDescription catalog = new CatalogDescription(PIVOT + "_CATALOG", Arrays.asList(PIVOT));
-		IActivePivotSchemaDescription schema = createActivePivotSchemaDescription(format);
+		IActivePivotSchemaDescription schema = createActivePivotSchemaDescription(format, env);
 		IActivePivotSchemaInstanceDescription instance = new ActivePivotSchemaInstanceDescription(PIVOT + "_SCHEMA", schema);
 		
 		ActivePivotManagerDescription desc = new ActivePivotManagerDescription();
