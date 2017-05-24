@@ -31,7 +31,7 @@ import com.qfs.security.cfg.impl.ACorsFilterConfig;
  * In the sandbox, the CORS filter will allow request from any server. User should modify the method
  * {@link #getAllowedOrigins()} to allow only authorized url(s).
  *
- * @author Quartet FS
+ * @author ActiveViam
  */
 @Configuration
 public class CorsFilterConfig extends ACorsFilterConfig {

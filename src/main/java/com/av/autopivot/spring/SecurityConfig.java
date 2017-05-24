@@ -76,7 +76,7 @@ import com.quartetfs.fwk.ordering.impl.CustomComparator;
 /**
  * Common security configuration.
  *
- * @author Quartet FS
+ * @author ActiveViam
  */
 @EnableGlobalAuthentication
 @EnableWebSecurity

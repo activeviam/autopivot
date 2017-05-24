@@ -45,7 +45,7 @@ import org.springframework.web.servlet.DispatcherServlet;
  * The content of this class replaces the old web.xml file in previous versions
  * of the servlet specification.
  *
- * @author Quartet FS
+ * @author ActiveViam
  *
  */
 public class AutoPivotWebAppInitializer implements WebApplicationInitializer {

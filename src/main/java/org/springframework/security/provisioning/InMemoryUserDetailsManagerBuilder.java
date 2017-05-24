@@ -32,7 +32,7 @@ import org.springframework.security.provisioning.UserDetailsManager;
  * An In-memory {@link UserDetailsService} builder which can be used without
  * {@link AuthenticationManagerBuilder} contrary to {@link InMemoryUserDetailsManagerConfigurer}.
  *
- * @author Quartet FS
+ * @author ActiveViam
  */
 public class InMemoryUserDetailsManagerBuilder
 		extends

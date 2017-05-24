@@ -44,7 +44,7 @@ import com.quartetfs.fwk.QuartetRuntimeException;
  *
  * Spring configuration of the Datastore.
  *
- * @author Quartet FS
+ * @author ActiveViam
  *
  */
 @Configuration
@@ -72,7 +72,6 @@ public class DatastoreConfig implements IDatastoreConfig {
 
 		return references;
 	}
-
 
 	
 	/**
@@ -103,7 +102,7 @@ public class DatastoreConfig implements IDatastoreConfig {
 		AutoPivotGenerator generator = generator();
 		
 		final Collection<IStoreDescription> stores = new LinkedList<>();
-		stores.add(generator.createStoreDescription(discovery));
+		stores.add(generator.createStoreDescription(discovery, env));
 		return new DatastoreSchemaDescription(stores, references());
 	}
 

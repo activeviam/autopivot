@@ -110,7 +110,7 @@ public class AutoPivotGenerator {
 	 * @param format
 	 * @return store description
 	 */
-	public IStoreDescription createStoreDescription(CSVFormat format) {
+	public IStoreDescription createStoreDescription(CSVFormat format, Environment env) {
 
 		List<IFieldDescription> fields = new ArrayList<>();
 		List<IOptimizationDescription> optimizations = new ArrayList<>();
@@ -146,7 +146,7 @@ public class AutoPivotGenerator {
 		}
 
 		// Partitioning
-		IPartitioningDescription partitioning = createPartitioningDescription(format);
+		IPartitioningDescription partitioning = createPartitioningDescription(format, env);
 		
 		@SuppressWarnings("unchecked")
 		StoreDescription desc = new StoreDescription(
@@ -172,23 +172,43 @@ public class AutoPivotGenerator {
 	 * @param format
 	 * @return partitioning description
 	 */
-	public IPartitioningDescription createPartitioningDescription(CSVFormat format) {
+	public IPartitioningDescription createPartitioningDescription(CSVFormat format, Environment env) {
 		
 		int processorCount = IPlatform.CURRENT_PLATFORM.getProcessorCount();
 		int partitionCount = processorCount/2;
 		if(partitionCount > 1) {
 
+			String partitioningField = env.getProperty("datastore.partitioningField");
+			if(partitioningField != null) {
+				
+				for(int c = 0; c < format.getColumnCount(); c++) {
+					String fieldName = format.getColumnName(c);
+					if(fieldName.equalsIgnoreCase(partitioningField)) {
+						PartitioningDescription desc = new PartitioningDescription();
+						desc.addPartitioning(fieldName, new PartitioningUtil.ModuloFunction(partitionCount));
+						return desc;
+					}
+				}
+				
+				LOGGER.warning("Configured partitioning field '" + partitioningField + "' does not exist in input file format. Default partitioning will be used.");
+				
+			}
+			
+			// Default partitioning, partition on the first field
+			// that is not numerical
+				
 			for(int c = 0; c < format.getColumnCount(); c++) {
 				String fieldName = format.getColumnName(c);
 				String fieldType = format.getColumnType(c);
-				
+					
 				if(!"float".equalsIgnoreCase(fieldType) && !"double".equalsIgnoreCase(fieldType)) {
+					LOGGER.info("Applying default partitioning policy: " + partitionCount + " partitions with partitioning field '" + fieldName + "'");
 					PartitioningDescription desc = new PartitioningDescription();
 					desc.addPartitioning(fieldName, new PartitioningUtil.ModuloFunction(partitionCount));
 					return desc;
 				}
 			}
-
+			
 		}
 		
 		return null;
@@ -365,5 +385,5 @@ public class AutoPivotGenerator {
 		desc.setSchemas(Arrays.asList(instance));
 		return desc;
 	}
-	
+
 }

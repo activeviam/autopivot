@@ -73,7 +73,7 @@ import com.quartetfs.fwk.contributions.impl.ClasspathContributionProvider;
  * rather autowire the appropriate spring configurations (and not beans directly unless necessary),
  * and use the beans from there.
  *
- * @author Quartet FS
+ * @author ActiveViam
  */
 @PropertySource(value = { "classpath:autopivot.properties", "classpath:jwt.properties" })
 @Configuration

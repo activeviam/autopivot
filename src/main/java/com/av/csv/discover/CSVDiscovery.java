@@ -43,6 +43,14 @@ import com.quartetfs.fwk.format.IParser;
 import com.quartetfs.fwk.impl.Pair;
 import com.quartetfs.fwk.types.IPlugin;
 
+/**
+ * 
+ * Utilities to discover the structure and format 
+ * of a CSV file.
+ * 
+ * @author ActiveViam
+ *
+ */
 public class CSVDiscovery {
 
 	/** Logger component */

@@ -28,7 +28,7 @@ import com.qfs.util.impl.QfsProperties;
  * <p>
  * This class is used, in particular, to align the lifetime of the cookie with that of the JWT token
  *
- * @author Quartet FS
+ * @author ActiveViam
  */
 public class CookieUtil {
 
