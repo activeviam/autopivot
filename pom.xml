@@ -7,14 +7,21 @@
 	<artifactId>autopivot</artifactId>
 	<packaging>jar</packaging>
 	<version>1.0.0-SNAPSHOT</version>
-	<name>ActiveViam AutoPivot Sample Project</name>
+	<name>ActiveViam AutoPivot</name>
 
 	<prerequisites>
 		<maven>3.0</maven>
 	</prerequisites>
 
+	<licenses>
+  		<license>
+    		<name>Apache License, Version 2.0</name>
+   			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
+  		</license>
+	</licenses>
+
 	<properties>
-		<activepivot.version>5.5.4</activepivot.version>
+		<activepivot.version>5.5.5</activepivot.version>
 		<activeui.version>4.1.3</activeui.version>
 		<jetty.version>9.2.21.v20170120</jetty.version>
 	</properties>

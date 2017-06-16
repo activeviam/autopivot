@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -50,17 +51,20 @@ import com.quartetfs.biz.pivot.definitions.IActivePivotInstanceDescription;
 import com.quartetfs.biz.pivot.definitions.IActivePivotManagerDescription;
 import com.quartetfs.biz.pivot.definitions.IActivePivotSchemaDescription;
 import com.quartetfs.biz.pivot.definitions.IActivePivotSchemaInstanceDescription;
+import com.quartetfs.biz.pivot.definitions.IAggregateProviderDefinition;
 import com.quartetfs.biz.pivot.definitions.IAggregatedMeasureDescription;
 import com.quartetfs.biz.pivot.definitions.IAggregatesCacheDescription;
 import com.quartetfs.biz.pivot.definitions.IAxisHierarchyDescription;
 import com.quartetfs.biz.pivot.definitions.IAxisLevelDescription;
 import com.quartetfs.biz.pivot.definitions.ICatalogDescription;
 import com.quartetfs.biz.pivot.definitions.INativeMeasureDescription;
+import com.quartetfs.biz.pivot.definitions.IPostProcessorDescription;
 import com.quartetfs.biz.pivot.definitions.impl.ActivePivotDescription;
 import com.quartetfs.biz.pivot.definitions.impl.ActivePivotInstanceDescription;
 import com.quartetfs.biz.pivot.definitions.impl.ActivePivotManagerDescription;
 import com.quartetfs.biz.pivot.definitions.impl.ActivePivotSchemaDescription;
 import com.quartetfs.biz.pivot.definitions.impl.ActivePivotSchemaInstanceDescription;
+import com.quartetfs.biz.pivot.definitions.impl.AggregateProviderDefinition;
 import com.quartetfs.biz.pivot.definitions.impl.AggregatedMeasureDescription;
 import com.quartetfs.biz.pivot.definitions.impl.AggregatesCacheDescription;
 import com.quartetfs.biz.pivot.definitions.impl.AxisDimensionDescription;
@@ -70,6 +74,7 @@ import com.quartetfs.biz.pivot.definitions.impl.AxisLevelDescription;
 import com.quartetfs.biz.pivot.definitions.impl.CatalogDescription;
 import com.quartetfs.biz.pivot.definitions.impl.MeasuresDescription;
 import com.quartetfs.biz.pivot.definitions.impl.NativeMeasureDescription;
+import com.quartetfs.biz.pivot.definitions.impl.PostProcessorDescription;
 import com.quartetfs.biz.pivot.definitions.impl.SelectionDescription;
 
 /**
@@ -228,6 +233,10 @@ public class AutoPivotGenerator {
 		
 		ActivePivotDescription desc = new ActivePivotDescription();
 		
+		
+		IAggregateProviderDefinition apd = new AggregateProviderDefinition("JUST_IN_TIME");
+		desc.setAggregateProvider(apd);
+		
 		// Hierarchies and dimensions
 		AxisDimensionsDescription dimensions = new AxisDimensionsDescription();
 		
@@ -273,6 +282,7 @@ public class AutoPivotGenerator {
 		// Measures
 		MeasuresDescription measureDesc = new MeasuresDescription();
 		List<IAggregatedMeasureDescription> measures = new ArrayList<>();
+		List<IPostProcessorDescription> postProcessors = new ArrayList<>();
 		
 		Set<String> numerics = QfsArrays.mutableSet("double", "float", "int", "long");
 		Set<String> integers = QfsArrays.mutableSet("int", "long");
@@ -282,12 +292,17 @@ public class AutoPivotGenerator {
 			String fieldType = format.getColumnType(f);
 			if(numerics.contains(fieldType) && !fieldName.endsWith("id") && !fieldName.endsWith("ID")) {
 				
-				// For each numerical input value, create aggregations for SUM, MIN, MAX and AVG
+				// For each numerical input value, create aggregations for SUM, min, max
 				AggregatedMeasureDescription sum = new AggregatedMeasureDescription(fieldName, "SUM");
-				AggregatedMeasureDescription avg = new AggregatedMeasureDescription(fieldName, "AVG");
-				AggregatedMeasureDescription min = new AggregatedMeasureDescription(fieldName, "MIN");
-				AggregatedMeasureDescription max = new AggregatedMeasureDescription(fieldName, "MAX");
+				AggregatedMeasureDescription min = new AggregatedMeasureDescription(fieldName, "min");
+				AggregatedMeasureDescription max = new AggregatedMeasureDescription(fieldName, "max");
+				
+				// Define a formula post processor to compute the average
+				PostProcessorDescription avg = new PostProcessorDescription(fieldName + ".avg", "FORMULA", new Properties());
+				String formula = "aggregatedValue[" + fieldName + ".SUM], aggregatedValue[contributors.COUNT], /";
+				avg.getProperties().setProperty("formula", formula);
 
+				// Put the measures for that field in one folder
 				sum.setFolder(fieldName);
 				avg.setFolder(fieldName);
 				min.setFolder(fieldName);
@@ -296,27 +311,26 @@ public class AutoPivotGenerator {
 				// Setup measure formatters
 				String formatter = integers.contains(fieldType) ? INTEGER_FORMAT : DOUBLE_FORMAT;
 				sum.setFormatter(formatter);
-				avg.setFormatter(DOUBLE_FORMAT);
 				min.setFormatter(formatter);
 				max.setFormatter(formatter);
+				avg.setFormatter(DOUBLE_FORMAT);
 				
 				measures.add(sum);
-				measures.add(avg);
 				measures.add(min);
 				measures.add(max);
+				
+				postProcessors.add(avg);
 			}
 		}
 		measureDesc.setAggregatedMeasuresDescription(measures);
+		measureDesc.setPostProcessorsDescription(postProcessors);
 		
-		// Configure "native" measures
+		// Configure "count" native measure
 		List<INativeMeasureDescription> nativeMeasures = new ArrayList<>();
 		INativeMeasureDescription countMeasure = new NativeMeasureDescription(IMeasureHierarchy.COUNT_ID, "Count");
 		countMeasure.setFormatter(INTEGER_FORMAT);
-		INativeMeasureDescription timestampMeasure = new NativeMeasureDescription(IMeasureHierarchy.TIMESTAMP_ID, "LastUpdate");
-		timestampMeasure.setFormatter(TIME_FORMAT);
-		measureDesc.setNativeMeasures(nativeMeasures);
 		nativeMeasures.add(countMeasure);
-		nativeMeasures.add(timestampMeasure);
+		measureDesc.setNativeMeasures(nativeMeasures);
 		
 		desc.setMeasuresDescription(measureDesc);
 		
