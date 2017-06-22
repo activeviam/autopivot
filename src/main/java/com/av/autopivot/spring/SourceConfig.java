@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.env.Environment;
 
 import com.av.autopivot.AutoPivotGenerator;
@@ -108,6 +109,7 @@ public class SourceConfig {
 	 * Load the CSV file
 	 */
 	@Bean
+	@DependsOn(value = "startManager")
 	public Void loadData(ICSVSource<Path> source) throws Exception {
 		
 		CSVFormat discovery = discoverFile();
@@ -147,6 +149,8 @@ public class SourceConfig {
 		
 		Fetch<IFileInfo<Path>, ILineReader> fetch = new Fetch<IFileInfo<Path>, ILineReader>(channelFactory);
 		fetch.fetch(source);
+		
+		LOGGER.info("AutoPivot initial loading complete.");
 		
 		return null; // Void
 	}
