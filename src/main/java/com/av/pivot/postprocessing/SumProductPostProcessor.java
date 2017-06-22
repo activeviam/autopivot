@@ -33,9 +33,9 @@ import com.quartetfs.fwk.QuartetExtendedPluginValue;
 /**
  * 
  * Dynamically perform the sum product of two underlying measures.
- * The base measures are calculated at the leaf levels of the post processors,
+ * The base measures are taken at the leaf levels defined in the post processor,
  * multiplied together, and then the products are aggregated together
- * up to the level of the query (SUM by default).
+ * up to the level of the query (SUM aggregation by default).
  * <p>
  * This post processor can be used directly from an MDX frontend
  * using the ActiveMeasure MDX function.
