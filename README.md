@@ -24,4 +24,4 @@ Here are some entry points to jump into the code, starting from `src/main/java`:
 * `src/main/resources/autopivot.properties` options of the AutoPivot application
 
 ## Licensing
-The code of the AutoPivot application is open source, licensed under the Apache License 2.0. But running the application requires a license for the ActivePivot software. To use the ActiveUI frontend, the ActivePivot license must have the ActiveUI option enabled.
+The code of the AutoPivot application is open source, licensed under the Apache License 2.0. The AutoPivot application depends on the ActivePivot (commercial) software, the ActivePivot jar files distributed by ActiveViam must be available in the maven repository for the application to build. Running the AutoPivot application requires a license for the ActivePivot software. To use the ActiveUI frontend, the ActivePivot license must have the ActiveUI option enabled.
