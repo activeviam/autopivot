@@ -3,6 +3,10 @@ AutoPivot is a standalone application for online analysis (OLAP) of CSV files.
 
 AutoPivot discovers the structure of CSV files, field separator, column names, column types, and loads data in memory with a high throughput parallel CSV source. AutoPivot exposes the data as a cube with hierarchies and aggregates that can be manipulated in the ActiveUI frontend of directly from the Microsoft Excel Pivot Table, using the XMLA protocol and MDX query language.
 
+## Launching AutoPivot
+Build the project with Maven, this generates a war file that can be deployed in Apache Tomcat. The ActiveUI will be available directly from Tomcat at the `/application-name/ui` url.
+Alternatively you can launch `com.av.autopivot.server.AutoPivotLauncher` directly from your development environment. It will run AutoPivot from an embedded Jetty application server. Deployed in that mode the ActiveUI frontend is available from `http://localhost:9090/ui`.
+
 ## Performance
 The multithreaded CSV source usually parses CSV data at several hundreds of MB/s. Of course this kind of throughput can only be reached with fast storage, a local SSD drive for instance or a fast storage accessed through a 10Gbps network.
 
@@ -24,4 +28,4 @@ Here are some entry points to jump into the code, starting from `src/main/java`:
 * `src/main/resources/autopivot.properties` options of the AutoPivot application
 
 ## Licensing
-The code of the AutoPivot application is open source, licensed under the Apache License 2.0. But running the application requires a license for the ActivePivot software. To use the ActiveUI frontend, the ActivePivot license must have the ActiveUI option enabled.
+The code of the AutoPivot application is open source, licensed under the Apache License 2.0. The AutoPivot application depends on the ActivePivot (commercial) software, the ActivePivot jar files distributed by ActiveViam must be available in the maven repository for the application to build. Running the AutoPivot application requires a license for the ActivePivot software. To use the ActiveUI frontend, the ActivePivot license must have the ActiveUI option enabled.
