@@ -8,7 +8,7 @@ Build the project with Maven, this generates a war file that can be deployed in 
 Alternatively you can launch `com.av.autopivot.server.AutoPivotLauncher` directly from your development environment. It will run AutoPivot from an embedded Jetty application server. Deployed in that mode the ActiveUI frontend is available from `http://localhost:9090/ui`.
 
 ## Performance
-The multithreaded CSV source usually parses CSV data at several hundreds of MB/s. Of course this kind of throughput can only be reached with fast storage, a local SSD drive for instance or a fast storage accessed through a 10Gbps network.
+The multithreaded CSV source usually parses CSV data at several hundreds of MB/s. Of course this kind of throughput can only be reached with fast storage, a local SSD drive for instance or network storage accessed through a 10Gbps network at least.
 
 AutoPivot is powered by the ActivePivot technology, the in-memory analytical platform developed by ActiveViam. ActivePivot runs on all sizes of hardware, from laptops to large servers with hundreds of cores and tens of terabytes of memory. When used in fire and forget mode, AutoPivot targets files up to a few hundreds of gigabytes.
 

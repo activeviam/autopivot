@@ -19,6 +19,7 @@
 package com.av.csv;
 
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 /**
  * 
@@ -28,6 +29,9 @@ import java.util.Arrays;
  *
  */
 public class CSVSplitter {
+	
+	/** Logger */
+	private static final Logger LOGGER = Logger.getLogger(CSVSplitter.class.getName());
 	
 	public static String[] split(String text, String separator) {
 		
@@ -53,7 +57,7 @@ public class CSVSplitter {
 				// or else is it the end of a field?
 				else if((c == text.length()-1) || (sep == text.charAt(c+1))) {
 					if(!withinQuotes) {
-						throw new IllegalStateException("Unexpected double quote character at position " + c + " in " + text);
+						LOGGER.warning("Unexpected double quote character at the end of a field: " + text);
 					}
 					withinQuotes = false;
 				}
@@ -80,9 +84,6 @@ public class CSVSplitter {
 				}
 				// or else is it the end of a field?
 				else if((c == text.length()-1) || (sep == text.charAt(c+1))) {
-					if(!withinQuotes) {
-						throw new IllegalStateException("Unexpected double quote character at position " + c + " in " + text);
-					}
 					withinQuotes = false;
 				}
 				
