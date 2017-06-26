@@ -206,7 +206,7 @@ public class AutoPivotGenerator {
 				String fieldName = format.getColumnName(c);
 				String fieldType = format.getColumnType(c);
 					
-				if(!"float".equalsIgnoreCase(fieldType) && !"double".equalsIgnoreCase(fieldType)) {
+				if(!"float".equalsIgnoreCase(fieldType) && !"double".equalsIgnoreCase(fieldType) && !"long".equalsIgnoreCase(fieldType)) {
 					LOGGER.info("Applying default partitioning policy: " + partitionCount + " partitions with partitioning field '" + fieldName + "'");
 					PartitioningDescription desc = new PartitioningDescription();
 					desc.addPartitioning(fieldName, new PartitioningUtil.ModuloFunction(partitionCount));

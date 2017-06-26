@@ -24,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -121,6 +122,19 @@ public class CSVDiscovery {
 	 * @throws IOException
 	 */
 	public CSVFormat discoverFile(String fileName) throws IOException {
+		return discoverFile(fileName, Charset.defaultCharset());
+	}
+	
+	/**
+	 * 
+	 * Discover the CSV format of a CSV file.
+	 * 
+	 * @param fileName
+	 * @param charset
+	 * @return CSV Format
+	 * @throws IOException
+	 */
+	public CSVFormat discoverFile(String fileName, Charset charset) throws IOException {
 		
 		LOG.info("Detecting CSV parser configuration for file " + fileName);
 		

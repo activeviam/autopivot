@@ -47,6 +47,7 @@ import com.qfs.msg.csv.ILineReader;
 import com.qfs.msg.csv.filesystem.impl.SingleFileCSVTopic;
 import com.qfs.msg.csv.impl.CSVParserConfiguration;
 import com.qfs.msg.csv.impl.CSVSource;
+import com.qfs.platform.IPlatform;
 import com.qfs.source.impl.CSVMessageChannelFactory;
 import com.qfs.source.impl.Fetch;
 import com.quartetfs.fwk.QuartetRuntimeException;
@@ -81,23 +82,43 @@ public class SourceConfig {
 	/** Create and configure the CSV engine */
 	@Bean
 	public ICSVSource<Path> CSVSource() throws IOException {
-
-		CSVSource<Path> source = new CSVSource<Path>();
 		
+		// Allocate half the the machine cores to CSV parsing
+		Integer parserThreads = Math.min(8, Math.max(1, IPlatform.CURRENT_PLATFORM.getProcessorCount() / 2));
+		LOGGER.info("Allocating " + parserThreads + " parser threads.");
+		
+		CSVSource<Path> source = new CSVSource<Path>();
 		Properties properties = new Properties();
-		properties.put(ICSVSourceConfiguration.BUFFER_SIZE_PROPERTY, "1024");
-		properties.put(ICSVSourceConfiguration.PARSER_THREAD_PROPERTY, "4");
+		properties.put(ICSVSourceConfiguration.BUFFER_SIZE_PROPERTY, "256");
+		properties.put(ICSVSourceConfiguration.PARSER_THREAD_PROPERTY, parserThreads.toString());
 		source.configure(properties);
 		
 		return source;
 	}
 	
+	/**
+	 * @return charset used by the CSV parsers.
+	 */
+	@Bean
+	public Charset charset() {
+		String charsetName = env.getProperty("charset");
+		if(charsetName != null) {
+			try {
+				return Charset.forName(charsetName);
+			} catch(Exception e) {
+				LOGGER.warning("Unkown charset: " + charsetName);
+			}
+		}
+		return Charset.defaultCharset();
+	}
+
+
 	/** Discover the input data file (CSV separator, column types) */
 	@Bean
 	public CSVFormat discoverFile() {
 		String fileName = env.getRequiredProperty("fileName");
 		try {
-			CSVFormat discovery = new CSVDiscovery().discoverFile(fileName);
+			CSVFormat discovery = new CSVDiscovery().discoverFile(fileName, charset());
 			return discovery;
 		} catch(Exception e) {
 			throw new QuartetRuntimeException("Could not discover csv file: " + fileName , e);
@@ -116,12 +137,13 @@ public class SourceConfig {
 		
 		// Create parser configuration
 		CSVParserConfiguration configuration = new CSVParserConfiguration(
-				Charset.defaultCharset(), 
+				charset(), 
 				discovery.getSeparator().charAt(0),
 				discovery.getColumnCount(),
 				true,
 				1,
 				CSVParserConfiguration.toMap(discovery.getColumnNames()));
+		configuration.setProcessQuotes(false);
 		
 		String fileName = env.getRequiredProperty("fileName");
 		SingleFileCSVTopic topic = new SingleFileCSVTopic(AutoPivotGenerator.BASE_STORE, configuration, fileName, 1000);
