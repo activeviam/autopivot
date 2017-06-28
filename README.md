@@ -1,7 +1,7 @@
 # ActiveViam AutoPivot
 AutoPivot is a standalone application for online analysis (OLAP) of CSV files.
 
-AutoPivot discovers the structure of CSV files, field separator, column names, column types, and loads data in memory with a high throughput parallel CSV source. AutoPivot exposes the data as a cube with hierarchies and aggregates that can be manipulated in the ActiveUI frontend of directly from the Microsoft Excel Pivot Table, using the XMLA protocol and MDX query language.
+AutoPivot discovers the structure of CSV files, field separator, column names, column types, and loads data in memory with a high throughput parallel CSV source. AutoPivot exposes the data as a cube with hierarchies and aggregates that can be manipulated in the ActiveUI frontend or directly from the Microsoft Excel Pivot Table, using the XMLA protocol and MDX query language.
 
 ## Launching AutoPivot
 Build the project with Maven, this generates a war file that can be deployed in Apache Tomcat. The ActiveUI will be available directly from Tomcat at the `/application-name/ui` url.
