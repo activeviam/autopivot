@@ -240,7 +240,11 @@ public class AutoPivotGenerator {
 		// Hierarchies and dimensions
 		AxisDimensionsDescription dimensions = new AxisDimensionsDescription();
 		
+		Set<String> numerics = QfsArrays.mutableSet("double", "float", "int", "long");
+		Set<String> integers = QfsArrays.mutableSet("int", "long");
+		Set<String> decimals = QfsArrays.mutableSet("double", "float");
 		Set<String> numericsOnly = QfsArrays.mutableSet("double", "float", "long");
+
 		for(int f = 0; f < format.getColumnCount(); f++) {
 			String fieldName = format.getColumnName(f);
 			String fieldType = format.getColumnType(f);
@@ -284,9 +288,6 @@ public class AutoPivotGenerator {
 		List<IAggregatedMeasureDescription> measures = new ArrayList<>();
 		List<IPostProcessorDescription> postProcessors = new ArrayList<>();
 		
-		Set<String> numerics = QfsArrays.mutableSet("double", "float", "int", "long");
-		Set<String> integers = QfsArrays.mutableSet("int", "long");
-		
 		for(int f = 0; f < format.getColumnCount(); f++) {
 			String fieldName = format.getColumnName(f);
 			String fieldType = format.getColumnType(f);
@@ -296,44 +297,92 @@ public class AutoPivotGenerator {
 				AggregatedMeasureDescription sum = new AggregatedMeasureDescription(fieldName, "SUM");
 				AggregatedMeasureDescription min = new AggregatedMeasureDescription(fieldName, "min");
 				AggregatedMeasureDescription max = new AggregatedMeasureDescription(fieldName, "max");
+				AggregatedMeasureDescription sq_sum = new AggregatedMeasureDescription(fieldName, "SQ_SUM");
+				sq_sum.setVisible(false);
+				
+				// Shared formula expressions
+				String sumExpression = "aggregatedValue[" + fieldName + ".SUM]";
+				String squareSumExpression = "aggregatedValue[" + fieldName + ".SQ_SUM]";
+				String countExpression = "aggregatedValue[contributors.COUNT]";
+				String avgExpression = "aggregatedValue[" + fieldName + ".avg]";
 				
 				// Define a formula post processor to compute the average
 				PostProcessorDescription avg = new PostProcessorDescription(fieldName + ".avg", "FORMULA", new Properties());
-				String formula = "aggregatedValue[" + fieldName + ".SUM], aggregatedValue[contributors.COUNT], /";
+				String formula = sumExpression + ", " + countExpression + ", /";
 				avg.getProperties().setProperty("formula", formula);
+				
+				// Define a formula post processor to compute the standard deviation
+				PostProcessorDescription std = new PostProcessorDescription(fieldName + ".STD", "FORMULA", new Properties());
+				String stdFormula = "(" + squareSumExpression + ", " + countExpression + ", /)";
+				stdFormula += ", (" + avgExpression + ", " + avgExpression + ", *), -, SQRT";
+				std.getProperties().setProperty("formula", stdFormula);
 
 				// Put the measures for that field in one folder
 				sum.setFolder(fieldName);
+				sq_sum.setFolder(fieldName);
 				avg.setFolder(fieldName);
+				std.setFolder(fieldName);
 				min.setFolder(fieldName);
 				max.setFolder(fieldName);
 				
 				// Setup measure formatters
 				String formatter = integers.contains(fieldType) ? INTEGER_FORMAT : DOUBLE_FORMAT;
 				sum.setFormatter(formatter);
+				sq_sum.setFormatter(formatter);
 				min.setFormatter(formatter);
 				max.setFormatter(formatter);
 				avg.setFormatter(DOUBLE_FORMAT);
+				std.setFormatter(DOUBLE_FORMAT);
 				
 				measures.add(sum);
 				measures.add(min);
 				measures.add(max);
 				
 				postProcessors.add(avg);
+				
+				// Add standard deviation only for floating point inputs
+				if(decimals.contains(fieldType)) {
+					measures.add(sq_sum);
+					postProcessors.add(std);
+				}
+
 			}
 		}
+
+
+		// Add distinct count calculation for each level field
+		for(int f = 0; f < format.getColumnCount(); f++) {
+			String fieldName = format.getColumnName(f);
+			String fieldType = format.getColumnType(f);
+
+			if(!numericsOnly.contains(fieldType)) {
+				
+				PostProcessorDescription dc = new PostProcessorDescription(fieldName + ".COUNT", "LEAF_COUNT", new Properties());
+				String leafExpression = fieldName + "@" + fieldName;
+				dc.getProperties().setProperty("leafLevels", leafExpression);
+				dc.setFolder("Distinct Count");
+				postProcessors.add(dc);
+			}
+		}
+		
+		
 		measureDesc.setAggregatedMeasuresDescription(measures);
 		measureDesc.setPostProcessorsDescription(postProcessors);
-		
+
 		// Configure "count" native measure
 		List<INativeMeasureDescription> nativeMeasures = new ArrayList<>();
 		INativeMeasureDescription countMeasure = new NativeMeasureDescription(IMeasureHierarchy.COUNT_ID, "Count");
 		countMeasure.setFormatter(INTEGER_FORMAT);
 		nativeMeasures.add(countMeasure);
+		
+		// Hide the last update measure that does not work Just In Time
+		INativeMeasureDescription lastUpdateMeasure = new NativeMeasureDescription(IMeasureHierarchy.TIMESTAMP_ID);
+		lastUpdateMeasure.setVisible(false);
+		nativeMeasures.add(lastUpdateMeasure);
+
 		measureDesc.setNativeMeasures(nativeMeasures);
-		
 		desc.setMeasuresDescription(measureDesc);
-		
+
 		// Aggregate cache configuration
 		if(env.containsProperty("pivot.cache.size")) {
 			Integer cacheSize = env.getProperty("pivot.cache.size", Integer.class);
@@ -342,7 +391,7 @@ public class AutoPivotGenerator {
 			cacheDescription.setSize(cacheSize);
 			desc.setAggregatesCacheDescription(cacheDescription);
 		}
-		
+
 		return desc;
 	}
 	
