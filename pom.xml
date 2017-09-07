@@ -21,7 +21,7 @@
 	</licenses>
 
 	<properties>
-		<activepivot.version>5.5.7</activepivot.version>
+		<activepivot.version>5.5.8</activepivot.version>
 		<activeui.version>4.1.6</activeui.version>
 		<jetty.version>9.2.22.v20170606</jetty.version>
 	</properties>
