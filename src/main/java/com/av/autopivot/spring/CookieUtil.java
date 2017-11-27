@@ -45,7 +45,7 @@ public class CookieUtil {
 		// Change the name of the cookie
 		config.setName(cookieName);
 
-		// Change the lifetime of the cookie session: it should not be greater than the lifetime of the tokens
+		// Change the lifetime of the cookie session: it should not be greater than the lifetime of the JWT tokens
 		String expiration = QfsProperties.loadProperties("jwt.properties").getProperty(JwtConfig.EXPIRATION_PROPERTY);
 
 		int maxAge = null != expiration ? Integer.parseInt(expiration): JwtConfig.DEFAULT_EXPIRATION;

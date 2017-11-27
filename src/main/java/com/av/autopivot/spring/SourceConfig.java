@@ -143,7 +143,7 @@ public class SourceConfig {
 				true,
 				1,
 				CSVParserConfiguration.toMap(discovery.getColumnNames()));
-		configuration.setProcessQuotes(false);
+		configuration.setProcessQuotes(true);
 		
 		String fileName = env.getRequiredProperty("fileName");
 		SingleFileCSVTopic topic = new SingleFileCSVTopic(AutoPivotGenerator.BASE_STORE, configuration, fileName, 1000);
