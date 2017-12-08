@@ -32,6 +32,9 @@ import com.qfs.util.impl.QfsProperties;
  */
 public class CookieUtil {
 
+	/** Cookie name for the AutoPivot application */
+	public static final String COOKIE_NAME = "AP_JSESSIONID";
+	
 	/**
 	 * Configures the cookies &#x1f36a;
 	 *

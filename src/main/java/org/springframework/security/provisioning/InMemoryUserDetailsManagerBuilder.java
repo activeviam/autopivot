@@ -38,9 +38,7 @@ public class InMemoryUserDetailsManagerBuilder
 		extends
 		UserDetailsManagerConfigurer<AuthenticationManagerBuilder, InMemoryUserDetailsManagerBuilder> {
 
-	/**
-	 * Creates a new instance
-	 */
+	/** Creates a new instance */
 	public InMemoryUserDetailsManagerBuilder() {
 		super(new InMemoryUserDetailsManager(new ArrayList<UserDetails>()));
 	}
@@ -54,7 +52,7 @@ public class InMemoryUserDetailsManagerBuilder
 
 	/**
 	 * Builds the In-memory {@link UserDetailsManager} and returns it
-	 * @return the built object
+	 * @return user details manager
 	 */
 	public UserDetailsManager build() {
 		try {

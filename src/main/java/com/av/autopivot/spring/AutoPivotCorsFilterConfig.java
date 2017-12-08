@@ -26,15 +26,16 @@ import org.springframework.context.annotation.Configuration;
 import com.qfs.security.cfg.impl.ACorsFilterConfig;
 
 /**
- * Spring configuration for CORS filter for the sandbox
+ * Spring configuration for CORS filter for the AutoPivot application
  * <p>
- * In the sandbox, the CORS filter will allow request from any server. User should modify the method
- * {@link #getAllowedOrigins()} to allow only authorized url(s).
+ * In AutoPivot, the CORS filter will allow request from any server.
+ * User should modify the method {@link #getAllowedOrigins()}
+ * to allow only authorized url(s).
  *
  * @author ActiveViam
  */
 @Configuration
-public class CorsFilterConfig extends ACorsFilterConfig {
+public class AutoPivotCorsFilterConfig extends ACorsFilterConfig {
 
 	@Override
 	public List<String> getAllowedOrigins() {

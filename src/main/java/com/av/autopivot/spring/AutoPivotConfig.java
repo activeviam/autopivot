@@ -30,25 +30,25 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 
+import com.qfs.content.cfg.impl.ContentServerWebSocketServicesConfig;
 import com.qfs.distribution.security.IDistributedSecurityManager;
 import com.qfs.messenger.IDistributedMessenger;
 import com.qfs.monitoring.HealthCheckAgent;
 import com.qfs.pivot.content.impl.DynamicActivePivotContentServiceMBean;
 import com.qfs.server.cfg.IActivePivotConfig;
-import com.qfs.server.cfg.IActivePivotContentServiceConfig;
 import com.qfs.server.cfg.IDatastoreConfig;
 import com.qfs.server.cfg.IJwtConfig;
+import com.qfs.server.cfg.content.IActivePivotContentServiceConfig;
 import com.qfs.server.cfg.impl.ActivePivotConfig;
-import com.qfs.server.cfg.impl.ActivePivotRemotingServicesConfig;
 import com.qfs.server.cfg.impl.ActivePivotServicesConfig;
-import com.qfs.server.cfg.impl.ActivePivotWebServicesConfig;
+import com.qfs.server.cfg.impl.ActivePivotWebSocketServicesConfig;
 import com.qfs.server.cfg.impl.ActivePivotXmlaServletConfig;
+import com.qfs.server.cfg.impl.ActiveViamRestServicesConfig;
 import com.qfs.server.cfg.impl.JwtConfig;
-import com.qfs.server.cfg.impl.QfsRestServicesConfig;
 import com.qfs.server.cfg.impl.StreamingMonitorConfig;
-import com.quartetfs.biz.pivot.monitoring.impl.JMXEnabler;
 import com.quartetfs.fwk.Registry;
 import com.quartetfs.fwk.contributions.impl.ClasspathContributionProvider;
+import com.quartetfs.fwk.monitoring.jmx.impl.JMXEnabler;
 
 /**
  * Generic Spring configuration of the Sandbox ActivePivot server application.
@@ -80,23 +80,24 @@ import com.quartetfs.fwk.contributions.impl.ClasspathContributionProvider;
 @Import(
 value = {
 		ActivePivotConfig.class,
+		ActivePivotManagerConfig.class,
 		DatastoreConfig.class,
 		ContentServiceConfig.class,
 		SourceConfig.class,
 		SecurityConfig.class,
 		JwtConfig.class,
-		CorsFilterConfig.class,
-
+		AutoPivotCorsFilterConfig.class,
+	
+		// ActiveViam Services
 		ActivePivotServicesConfig.class,
-		ActivePivotWebServicesConfig.class,
-		ActivePivotRemotingServicesConfig.class,
-		ActivePivotXmlaServletConfig.class,
-
-		// i18n support
-		I18nConfig.class,
+		ActiveViamRestServicesConfig.class,
 		
-		// Rest services
-		QfsRestServicesConfig.class,
+		// XMLA Servlet
+		ActivePivotXmlaServletConfig.class,
+		
+		// Websocket configuration
+		ActivePivotWebSocketServicesConfig.class,
+		ContentServerWebSocketServicesConfig.class,
 
 		// Monitoring for the Streaming services
 		StreamingMonitorConfig.class,
@@ -231,7 +232,7 @@ public class AutoPivotConfig {
 
 		// Inject the distributed security manager with security services
 		for (Object key : Registry.getExtendedPlugin(IDistributedSecurityManager.class).keys()) {
-			inject(IDistributedSecurityManager.class, String.valueOf(key), securityConfig.qfsUserDetailsService());
+			inject(IDistributedSecurityManager.class, String.valueOf(key), securityConfig.avUserDetailsService());
 		}
 	}
 

@@ -35,7 +35,6 @@ import com.qfs.desc.IStoreDescription;
 import com.qfs.desc.impl.DatastoreSchemaDescription;
 import com.qfs.multiversion.impl.KeepLastEpochPolicy;
 import com.qfs.server.cfg.IDatastoreConfig;
-import com.qfs.server.cfg.impl.ActivePivotConfig;
 import com.qfs.store.IDatastore;
 import com.qfs.store.build.impl.DatastoreBuilder;
 import com.quartetfs.fwk.QuartetRuntimeException;
@@ -54,13 +53,10 @@ public class DatastoreConfig implements IDatastoreConfig {
 	@Autowired
 	protected Environment env;
 
-	/** {@link ActivePivotConfig} spring configuration */
-	@Autowired
-	protected ActivePivotConfig apConfig;
-
 	/** Source configuration */
 	@Autowired
 	protected SourceConfig sourceConfig;
+
 
 	// ////////////////////////////////////////////////
 	// Schema & Datastore

@@ -108,7 +108,7 @@ public class CSVDiscovery {
 				plugin.valueOf("DATE[dd-MM-yyyy]"),
 				plugin.valueOf("DATE[dd/MM/yyyy]"),
 				plugin.valueOf("DATE[d-MMM-yyyy]"),
-				plugin.valueOf("DATE[EEE MMM dd HH:mm:ss zzz yyyy]"))
+				plugin.valueOf("DATE[EEE MMM dd HH:mm:ss zzzz yyyy]"))
 				.collect(toList());
 	}
 

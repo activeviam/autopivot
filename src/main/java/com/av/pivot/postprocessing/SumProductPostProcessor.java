@@ -44,7 +44,7 @@ import com.quartetfs.fwk.QuartetExtendedPluginValue;
  *
  */
 @QuartetExtendedPluginValue(intf = IPostProcessor.class, key = SumProductPostProcessor.PLUGIN_TYPE)
-public class SumProductPostProcessor extends ADynamicAggregationPostProcessor<Double> {
+public class SumProductPostProcessor extends ADynamicAggregationPostProcessor<Double, Double> {
 
 	/** serialVersionUID */
 	private static final long serialVersionUID = 1L;
@@ -83,7 +83,7 @@ public class SumProductPostProcessor extends ADynamicAggregationPostProcessor<Do
 	
 	@Override
 	protected Double evaluateLeaf(ILocation leafLocation, Object[] underlyingMeasures) {
-		// Should never get called as the optimised leaf evaluation is implemented
+		// Should never get called as the optimized leaf evaluation is implemented (above)
 		throw new UnsupportedOperationException();
 	}
 

@@ -38,8 +38,8 @@ import com.qfs.desc.impl.OptimizationDescription;
 import com.qfs.desc.impl.StoreDescription;
 import com.qfs.platform.IPlatform;
 import com.qfs.store.part.IPartitioningDescription;
-import com.qfs.store.part.impl.PartitioningDescription;
-import com.qfs.store.part.impl.PartitioningUtil;
+import com.qfs.store.part.impl.ModuloFunctionDescription;
+import com.qfs.store.part.impl.PartitioningDescriptionBuilder;
 import com.qfs.store.selection.ISelectionField;
 import com.qfs.store.selection.impl.SelectionField;
 import com.qfs.util.impl.QfsArrays;
@@ -189,9 +189,9 @@ public class AutoPivotGenerator {
 				for(int c = 0; c < format.getColumnCount(); c++) {
 					String fieldName = format.getColumnName(c);
 					if(fieldName.equalsIgnoreCase(partitioningField)) {
-						PartitioningDescription desc = new PartitioningDescription();
-						desc.addPartitioning(fieldName, new PartitioningUtil.ModuloFunction(partitionCount));
-						return desc;
+						return new PartitioningDescriptionBuilder()
+						.addSubPartitioning(fieldName, new ModuloFunctionDescription(partitionCount))
+						.build();
 					}
 				}
 				
@@ -208,9 +208,9 @@ public class AutoPivotGenerator {
 					
 				if(!"float".equalsIgnoreCase(fieldType) && !"double".equalsIgnoreCase(fieldType) && !"long".equalsIgnoreCase(fieldType)) {
 					LOGGER.info("Applying default partitioning policy: " + partitionCount + " partitions with partitioning field '" + fieldName + "'");
-					PartitioningDescription desc = new PartitioningDescription();
-					desc.addPartitioning(fieldName, new PartitioningUtil.ModuloFunction(partitionCount));
-					return desc;
+					return new PartitioningDescriptionBuilder()
+					.addSubPartitioning(fieldName, new ModuloFunctionDescription(partitionCount))
+					.build();
 				}
 			}
 			
@@ -252,6 +252,10 @@ public class AutoPivotGenerator {
 
 			if(!numericsOnly.contains(fieldType)) {
 				AxisDimensionDescription dimension = new AxisDimensionDescription(fieldName);
+				IAxisHierarchyDescription h = new AxisHierarchyDescription(fieldName);
+				IAxisLevelDescription l = new AxisLevelDescription(fieldName);
+				h.getLevels().add(l);
+				dimension.getHierarchies().add(h);
 				dimensions.addValues(Arrays.asList(dimension));
 				
 				// For date fields generate the YEAR-MONTH-DAY hierarchy

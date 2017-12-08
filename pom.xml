@@ -21,9 +21,9 @@
 	</licenses>
 
 	<properties>
-		<activepivot.version>5.5.9</activepivot.version>
-		<activeui.version>4.1.9</activeui.version>
-		<jetty.version>9.2.22.v20170606</jetty.version>
+		<activepivot.version>5.6.0</activepivot.version>
+		<activeui.version>4.1.10</activeui.version>
+		<jetty.version>9.4.8.v20171121</jetty.version>
 	</properties>
 
 	<dependencies>
@@ -35,7 +35,7 @@
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
-			<version>3.1.0</version>
+			<version>4.0.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

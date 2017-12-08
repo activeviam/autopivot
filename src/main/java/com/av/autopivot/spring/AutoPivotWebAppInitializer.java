@@ -67,7 +67,7 @@ public class AutoPivotWebAppInitializer implements WebApplicationInitializer {
 		// Set the session cookie name. Must be done when there are several servers (AP,
 		// Content server, ActiveMonitor) with the same URL but running on different ports.
 		// Cookies ignore the port (See RFC 6265).
-		CookieUtil.configure(servletContext.getSessionCookieConfig(), SecurityConfig.COOKIE_NAME);
+		CookieUtil.configure(servletContext.getSessionCookieConfig(), CookieUtil.COOKIE_NAME);
 
 		// The main servlet/the central dispatcher
 		final DispatcherServlet servlet = new DispatcherServlet(rootAppContext);

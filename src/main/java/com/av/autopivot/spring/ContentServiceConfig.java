@@ -21,15 +21,14 @@ package com.av.autopivot.spring;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
+import org.springframework.context.annotation.Import;
 
-import com.av.autopivot.AutoPivotGenerator;
-import com.av.csv.CSVFormat;
 import com.qfs.content.cfg.impl.ContentServerRestServicesConfig;
 import com.qfs.content.service.IContentService;
 import com.qfs.pivot.content.IActivePivotContentService;
 import com.qfs.pivot.content.impl.ActivePivotContentServiceBuilder;
-import com.qfs.server.cfg.IActivePivotContentServiceConfig;
+import com.qfs.server.cfg.content.IActivePivotContentServiceConfig;
+import com.qfs.server.cfg.i18n.impl.LocalI18nConfig;
 import com.quartetfs.biz.pivot.definitions.IActivePivotManagerDescription;
 
 /**
@@ -39,21 +38,16 @@ import com.quartetfs.biz.pivot.definitions.IActivePivotManagerDescription;
  *
  * @author ActiveViam
  */
+@Import(value={
+		LocalI18nConfig.class, // (I18n) Cube translation is set up from the file system
+		ActiveUIResourceServerConfig.class, // (ActiveUI) Expose the ActiveUI web application
+})
 @Configuration
 public class ContentServiceConfig implements IActivePivotContentServiceConfig {
 
-	/** Spring environment */
+	/** ActivePivot Manager Configuration */
 	@Autowired
-	protected Environment env;
-	
-	/** Datasource configuration */
-	@Autowired
-	protected SourceConfig sourceConfig;
-	
-
-	/** Datastore configuration */
-	@Autowired
-	protected DatastoreConfig datastoreConfig;
+	protected ActivePivotManagerConfig managerConfig;
 
 	/**
 	 * @return ActivePivot content service used to store context
@@ -63,15 +57,12 @@ public class ContentServiceConfig implements IActivePivotContentServiceConfig {
 	@Override
 	public IActivePivotContentService activePivotContentService() {
 
-		CSVFormat discovery = sourceConfig.discoverFile();
-		AutoPivotGenerator generator = datastoreConfig.generator();
-		
-		IActivePivotManagerDescription manager = generator.createActivePivotManagerDescription(discovery, env);
+		IActivePivotManagerDescription manager = managerConfig.managerDescription();
 		
 		return new ActivePivotContentServiceBuilder()
 				.withoutPersistence()
 				.withoutCache()
-				.needInitialization("ROLE_USER", "ROLE_USER")
+				.needInitialization(SecurityConfig.ROLE_USER, SecurityConfig.ROLE_USER)
 				.withDescription(manager)
 				// Push the context values stored in ROLE-INF directory
 				.withContextValues("ROLE-INF")
