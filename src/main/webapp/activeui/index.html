@@ -51,7 +51,7 @@ body {
 function handleLoad() {
   const activeUI = ActiveUI.initialize({
     defaultSettings: {
-      'global.logger': 'errors'
+      'global.logger': 'warnings'
     }
   });
 
@@ -97,59 +97,47 @@ function handleLoad() {
 
   activeUI.widgets.createDashboard()
     .withName('ActiveUI for AutoPivot')
-    .withActions([
-      'snl-messages',
-      'snl-alerts',
-      'save',
-      'save-as',
-      'edit-dashboard',
-      'logout',
-      'about',
-      'toggle-title-bar'
-    ])
-    .withStyle({
-      head: {
-        all: {
-          borderBottom: null
-        }
-      }
-    })
-    .withLayout({
-      direction: 'row',
-      children: {
-        0: {
-          size: 1 / 5
-        },
-        1: {
-          direction: 'row',
-          children: {
-            0: {
-              size: 4 / 5,
-              direction: 'column',
-              children: {
-                0: {
-                  size: 1 / 10
+    .withActions(['save', 'save-as', 'logout', 'about', 'toggle-dock-title-bar'])
+    .withQuickActions(['activemonitor-messages', 'activemonitor-alerts', 'edit-dashboard'])
+    .withStyle({head: {all: {borderBottom: null}}})
+    .withConfiguration({
+      layout: {
+        direction: 'row',
+        children: {
+          0: {
+            size: 1 / 5,
+          },
+          1: {
+            direction: 'row',
+            children: {
+              0: {
+                size: 4 / 5,
+                direction: 'column',
+                children: {
+                  0: {
+                    size: 1 / 10,
+                  },
+                  1: {},
                 },
-                1: {}
-              }
+              },
+              1: {
+                direction: 'column',
+                children: {
+                  0: {},
+                  1: {},
+                },
+              },
             },
-            1: {
-              direction: 'column',
-              children: {
-                0: {},
-                1: {}
-              }
-            }
-          }
-        }
-      }
+          },
+        },
+      },
+      content: [
+        {key: '0', bookmark: bookmarkTreeBookmark},
+        {key: '1', bookmark: filtersBookmark},
+        {key: '3', bookmark: discoveryBookmark},
+        {key: '4', bookmark: mdxEditorBookmark},
+      ],
     })
-    .withContent([
-      {key: '0', bookmark: bookmarkTreeBookmark},
-      {key: '1', bookmark: filtersBookmark},
-      {key: '3', bookmark: discoveryBookmark},
-      {key: '4', bookmark: mdxEditorBookmark}
-    ])
     .within('desktop');
 }
   </script>
