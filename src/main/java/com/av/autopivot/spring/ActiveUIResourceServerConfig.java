@@ -19,11 +19,9 @@
 package com.av.autopivot.spring;
 
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import org.springframework.context.annotation.Configuration;
 
-import com.qfs.QfsWebUtils;
 import com.qfs.server.cfg.impl.ASpringResourceServerConfig;
 import com.qfs.util.impl.QfsArrays;
 
@@ -51,6 +49,7 @@ public class ActiveUIResourceServerConfig extends ASpringResourceServerConfig {
 		registry.redirectTo(NAMESPACE + "/index.html", "/");
 	}
 
+
 	/**
 	 * Registers resources to serve.
 	 *
@@ -59,11 +58,11 @@ public class ActiveUIResourceServerConfig extends ASpringResourceServerConfig {
 	@Override
 	protected void registerResources(final ResourceRegistry registry) {
 		super.registerResources(registry);
-		final Set<String> locations = QfsArrays.mutableSet("/", "classpath:META-INF/resources/");
+
 		// ActiveUI web app also serves request to the root, so that the redirection from root to ActiveUI works
-		registry.serve(new String[] { QfsWebUtils.url("/") })
-				.addResourceLocations(locations.toArray(new String[locations.size()]))
-				.setCachePeriod((int) TimeUnit.DAYS.toSeconds(7));
+		registry.serve("/")
+				.addResourceLocations("/", "classpath:META-INF/resources/")
+				.setCacheControl(getDefaultCacheControl());
 	}
 
 	/**
@@ -89,13 +88,14 @@ public class ActiveUIResourceServerConfig extends ASpringResourceServerConfig {
 
 	@Override
 	public Set<String> getResourceLocations() {
-		// ActiveUI is integrated using Maven
-		// You can read more about this feature here http://support.activeviam.com/documentation/activeui/4.1.0/start/maven-integration/
+		// ActiveUI is integrated in the sandbox project thanks to Maven integration.
+		// You can read more about this feature here https://support.activeviam.com/documentation/activeui/4.2.0/dev/setup/maven-integration.html
 
-		// As a result, the resources for ActiveUI web application are found at two locations
-		// 1) src/main/resource/activeui: where index.html, favicon.ico are stored
-		// 2) classpath:META-INF/resources/activeui/: other scripts necessary for the web application (like app.min.js)
-		return QfsArrays.mutableSet("/activeui/", "classpath:META-INF/resources/activeui/");
+		return QfsArrays.mutableSet(
+				"/activeui/", // index.html, favicon.ico, etc.
+				"classpath:META-INF/resources/activeviam/activeui-sdk/", // ActiveUI SDK UMD scripts and supporting assets
+				"classpath:META-INF/resources/webjars/react/16.3.1/umd/",
+				"classpath:META-INF/resources/webjars/react-dom/16.3.1/umd/");
 	}
 
 }

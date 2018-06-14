@@ -18,13 +18,11 @@
  */
 package com.av.autopivot.spring;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 import com.av.autopivot.AutoPivotGenerator;
@@ -33,21 +31,16 @@ import com.qfs.desc.IDatastoreSchemaDescription;
 import com.qfs.desc.IReferenceDescription;
 import com.qfs.desc.IStoreDescription;
 import com.qfs.desc.impl.DatastoreSchemaDescription;
-import com.qfs.multiversion.impl.KeepLastEpochPolicy;
-import com.qfs.server.cfg.IDatastoreConfig;
-import com.qfs.store.IDatastore;
-import com.qfs.store.build.impl.DatastoreBuilder;
-import com.quartetfs.fwk.QuartetRuntimeException;
+import com.qfs.server.cfg.IDatastoreDescriptionConfig;
 
 /**
- *
- * Spring configuration of the Datastore.
- *
+ * 
+ * Description of the datastore.
+ * 
  * @author ActiveViam
  *
  */
-@Configuration
-public class DatastoreConfig implements IDatastoreConfig {
+public class DatastoreDescriptionConfig implements IDatastoreDescriptionConfig {
 
 	/** Spring environment, automatically wired */
 	@Autowired
@@ -56,18 +49,6 @@ public class DatastoreConfig implements IDatastoreConfig {
 	/** Source configuration */
 	@Autowired
 	protected SourceConfig sourceConfig;
-
-
-	// ////////////////////////////////////////////////
-	// Schema & Datastore
-	// ////////////////////////////////////////////////
-
-	/** @return the references between stores */
-	public Collection<IReferenceDescription> references() {
-		final Collection<IReferenceDescription> references = new LinkedList<>();
-
-		return references;
-	}
 
 	
 	/**
@@ -79,6 +60,13 @@ public class DatastoreConfig implements IDatastoreConfig {
 	@Bean
 	public AutoPivotGenerator generator() {
 		return new AutoPivotGenerator();
+	}
+	
+	/** @return the references between stores */
+	public Collection<IReferenceDescription> references() {
+		final Collection<IReferenceDescription> references = new LinkedList<>();
+
+		return references;
 	}
 	
 	/**
@@ -93,33 +81,13 @@ public class DatastoreConfig implements IDatastoreConfig {
 	 * @return schema description
 	 */
 	@Bean
-	public IDatastoreSchemaDescription schemaDescription() throws IOException {
+	public IDatastoreSchemaDescription schemaDescription() {
 		CSVFormat discovery = sourceConfig.discoverFile();
 		AutoPivotGenerator generator = generator();
 		
 		final Collection<IStoreDescription> stores = new LinkedList<>();
 		stores.add(generator.createStoreDescription(discovery, env));
 		return new DatastoreSchemaDescription(stores, references());
-	}
-
-	/**
-	 * Instantiate the datastore. There is only one Datastore in the application
-	 * and it is automatically wired in other Spring configuration files.
-	 *
-	 * @return datastore bean
-	 */
-	@Bean
-	public IDatastore datastore() {
-		try {
-			return new DatastoreBuilder()
-					.setSchemaDescription(schemaDescription())
-					// Only keep latest version of the data
-					.setEpochManagementPolicy(new KeepLastEpochPolicy())
-					// Build the datastore (no transaction log)
-					.build();
-		} catch(Exception e) {
-			throw new QuartetRuntimeException("Error, impossible to build datastore", e);
-		}
 	}
 
 }

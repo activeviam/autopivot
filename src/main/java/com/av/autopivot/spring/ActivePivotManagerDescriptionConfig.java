@@ -23,7 +23,7 @@ import org.springframework.core.env.Environment;
 
 import com.av.autopivot.AutoPivotGenerator;
 import com.av.csv.CSVFormat;
-import com.qfs.server.cfg.IActivePivotManagerConfig;
+import com.qfs.server.cfg.IActivePivotManagerDescriptionConfig;
 import com.quartetfs.biz.pivot.definitions.IActivePivotManagerDescription;
 
 /**
@@ -36,7 +36,7 @@ import com.quartetfs.biz.pivot.definitions.IActivePivotManagerDescription;
  * @author ActiveViam
  *
  */
-public class ActivePivotManagerConfig implements IActivePivotManagerConfig {
+public class ActivePivotManagerDescriptionConfig implements IActivePivotManagerDescriptionConfig {
 
 	/** Spring environment */
 	@Autowired
@@ -48,7 +48,7 @@ public class ActivePivotManagerConfig implements IActivePivotManagerConfig {
 
 	/** Datastore configuration */
 	@Autowired
-	protected DatastoreConfig datastoreConfig;
+	protected DatastoreDescriptionConfig datastoreConfig;
 
 	@Override
 	public IActivePivotManagerDescription managerDescription() {

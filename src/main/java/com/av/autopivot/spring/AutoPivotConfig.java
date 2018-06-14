@@ -30,10 +30,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 
+import com.activeviam.health.monitor.impl.HealthCheckAgent;
 import com.qfs.content.cfg.impl.ContentServerWebSocketServicesConfig;
 import com.qfs.distribution.security.IDistributedSecurityManager;
 import com.qfs.messenger.IDistributedMessenger;
-import com.qfs.monitoring.HealthCheckAgent;
 import com.qfs.pivot.content.impl.DynamicActivePivotContentServiceMBean;
 import com.qfs.server.cfg.IActivePivotConfig;
 import com.qfs.server.cfg.IDatastoreConfig;
@@ -44,6 +44,7 @@ import com.qfs.server.cfg.impl.ActivePivotServicesConfig;
 import com.qfs.server.cfg.impl.ActivePivotWebSocketServicesConfig;
 import com.qfs.server.cfg.impl.ActivePivotXmlaServletConfig;
 import com.qfs.server.cfg.impl.ActiveViamRestServicesConfig;
+import com.qfs.server.cfg.impl.DatastoreConfig;
 import com.qfs.server.cfg.impl.JwtConfig;
 import com.qfs.server.cfg.impl.StreamingMonitorConfig;
 import com.quartetfs.fwk.Registry;
@@ -80,8 +81,11 @@ import com.quartetfs.fwk.monitoring.jmx.impl.JMXEnabler;
 @Import(
 value = {
 		ActivePivotConfig.class,
-		ActivePivotManagerConfig.class,
+		ActivePivotManagerDescriptionConfig.class,
+		DatastoreDescriptionConfig.class,
 		DatastoreConfig.class,
+		DatastoreServiceConfig.class,
+		ActivePivotBranchPermissionsManagerConfig.class,
 		ContentServiceConfig.class,
 		SourceConfig.class,
 		SecurityConfig.class,
@@ -209,9 +213,11 @@ public class AutoPivotConfig {
 	 *
 	 * @return the health check agent
 	 */
-	@Bean(initMethod = "start", destroyMethod = "interrupt")
+	@Bean(destroyMethod = "stop")
 	public HealthCheckAgent healthCheckAgent() {
-		return new HealthCheckAgent(60); // One trace per minute
+		return HealthCheckAgent.create(
+				datastoreConfig.datastore(),
+				apConfig.activePivotManager());
 	}
 
 	/**

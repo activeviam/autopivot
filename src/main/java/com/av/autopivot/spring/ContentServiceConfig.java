@@ -47,7 +47,7 @@ public class ContentServiceConfig implements IActivePivotContentServiceConfig {
 
 	/** ActivePivot Manager Configuration */
 	@Autowired
-	protected ActivePivotManagerConfig managerConfig;
+	protected ActivePivotManagerDescriptionConfig managerConfig;
 
 	/**
 	 * @return ActivePivot content service used to store context
