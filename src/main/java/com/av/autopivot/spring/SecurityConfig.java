@@ -31,6 +31,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManagerBuilder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -99,6 +100,11 @@ public abstract class SecurityConfig {
 	@Autowired
 	protected IJwtConfig jwtConfig;
 
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+
 	/**
 	 * Returns the default {@link AuthenticationEntryPoint} to use
 	 * for the fallback basic HTTP authentication.
@@ -116,7 +122,8 @@ public abstract class SecurityConfig {
 		auth
 				.eraseCredentials(false)
 				// Add an LDAP authentication provider instead of this to support LDAP
-				.userDetailsService(userDetailsService()).and()
+				.userDetailsService(userDetailsService())
+				.passwordEncoder(passwordEncoder()).and()
 				// Required to allow JWT
 				.authenticationProvider(jwtConfig.jwtAuthenticationProvider());
 	}
@@ -143,8 +150,8 @@ public abstract class SecurityConfig {
 	@Bean
 	public UserDetailsService userDetailsService() {
 		InMemoryUserDetailsManagerBuilder b = new InMemoryUserDetailsManagerBuilder()
-				.withUser("admin").password(SPRING_ENCRYPT + new BCryptPasswordEncoder().encode("admin")).authorities(ROLE_USER, ROLE_ADMIN, ROLE_CS_ROOT).and()
-				.withUser("user").password(SPRING_ENCRYPT + new BCryptPasswordEncoder().encode("user")).authorities(ROLE_USER).and();
+				.withUser("admin").password(SPRING_ENCRYPT + passwordEncoder().encode("admin")).authorities(ROLE_USER, ROLE_ADMIN, ROLE_CS_ROOT).and()
+				.withUser("user").password(SPRING_ENCRYPT + passwordEncoder().encode("user")).authorities(ROLE_USER).and();
 
 		return new CompositeUserDetailsService(Arrays.asList(b.build(), technicalUserDetailsService()));
 	}
@@ -157,7 +164,7 @@ public abstract class SecurityConfig {
 	 */
 	protected UserDetailsManager technicalUserDetailsService() {
 		return new InMemoryUserDetailsManagerBuilder()
-				.withUser("pivot").password(SPRING_ENCRYPT + new BCryptPasswordEncoder().encode("pivot")).authorities(ROLE_TECH, ROLE_CS_ROOT).and()
+				.withUser("pivot").password(SPRING_ENCRYPT + passwordEncoder().encode("pivot")).authorities(ROLE_TECH, ROLE_CS_ROOT).and()
 				.build();
 	}
 	
