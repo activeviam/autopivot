@@ -94,9 +94,6 @@ public abstract class SecurityConfig {
 	/** Content Server Root role */
 	public static final String ROLE_CS_ROOT = IContentService.ROLE_ROOT;
 
-	/** Encrypt Mode (new with Spring Security 5 */
-	public static final String SPRING_ENCRYPT = "{bcrypt}";
-
 	@Autowired
 	protected IJwtConfig jwtConfig;
 
@@ -123,7 +120,8 @@ public abstract class SecurityConfig {
 				.eraseCredentials(false)
 				// Add an LDAP authentication provider instead of this to support LDAP
 				.userDetailsService(userDetailsService())
-				.passwordEncoder(passwordEncoder()).and()
+				.passwordEncoder(passwordEncoder())
+                .and()
 				// Required to allow JWT
 				.authenticationProvider(jwtConfig.jwtAuthenticationProvider());
 	}
@@ -150,8 +148,8 @@ public abstract class SecurityConfig {
 	@Bean
 	public UserDetailsService userDetailsService() {
 		InMemoryUserDetailsManagerBuilder b = new InMemoryUserDetailsManagerBuilder()
-				.withUser("admin").password(SPRING_ENCRYPT + passwordEncoder().encode("admin")).authorities(ROLE_USER, ROLE_ADMIN, ROLE_CS_ROOT).and()
-				.withUser("user").password(SPRING_ENCRYPT + passwordEncoder().encode("user")).authorities(ROLE_USER).and();
+				.withUser("admin").password(passwordEncoder().encode("admin")).authorities(ROLE_USER, ROLE_ADMIN, ROLE_CS_ROOT).and()
+				.withUser("user").password(passwordEncoder().encode("user")).authorities(ROLE_USER).and();
 
 		return new CompositeUserDetailsService(Arrays.asList(b.build(), technicalUserDetailsService()));
 	}
@@ -164,7 +162,7 @@ public abstract class SecurityConfig {
 	 */
 	protected UserDetailsManager technicalUserDetailsService() {
 		return new InMemoryUserDetailsManagerBuilder()
-				.withUser("pivot").password(SPRING_ENCRYPT + passwordEncoder().encode("pivot")).authorities(ROLE_TECH, ROLE_CS_ROOT).and()
+				.withUser("pivot").password(passwordEncoder().encode("pivot")).authorities(ROLE_TECH, ROLE_CS_ROOT).and()
 				.build();
 	}
 	
