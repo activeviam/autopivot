@@ -31,6 +31,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 
 import com.activeviam.health.monitor.impl.HealthCheckAgent;
+import com.av.export.DatastoreExportService;
 import com.qfs.content.cfg.impl.ContentServerWebSocketServicesConfig;
 import com.qfs.distribution.security.IDistributedSecurityManager;
 import com.qfs.messenger.IDistributedMessenger;
@@ -207,6 +208,17 @@ public class AutoPivotConfig {
 						apCSConfig.activePivotContentService(),
 						apConfig.activePivotManager()));
 	}
+	
+	/**
+	 * Export a datastore export service through JMX
+	 *
+	 * @return the {@link JMXEnabler} attached to the datastore export service
+	 */
+	@Bean
+	public JMXEnabler JMXDatastoreExportService() {
+		return new JMXEnabler(new DatastoreExportService(datastoreConfig.datastore()));
+	}
+
 
 	/**
 	 * Health Check Agent bean
