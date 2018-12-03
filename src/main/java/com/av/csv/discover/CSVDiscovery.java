@@ -149,8 +149,10 @@ public class CSVDiscovery {
 
 			LOG.info("Detected separator: " + separator);
 			
-			// Extract column names from header
+			// Extract column names from header, replace spaces and the '/' reserved character if needed
 			List<String> headers = Arrays.asList(CSVSplitter.split(lines.get(0), separator));
+			headers = headers.stream().map(s -> s.replaceAll(" ", "_")).collect(Collectors.toList());
+			headers = headers.stream().map(s -> s.replaceAll("/", "_")).collect(Collectors.toList());
 			
 			LOG.info("Column names: " + headers);
 			

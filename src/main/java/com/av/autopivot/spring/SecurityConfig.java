@@ -63,7 +63,7 @@ import com.quartetfs.fwk.security.IUserDetailsService;
  * This class contains methods:
  * <ul>
  * <li>To define authorized users</li>,
- * <li>To enable anomymous user access</li>,
+ * <li>To enable anonymous user access</li>,
  * <li>To configure the JWT filter</li>,
  * <li>To configure the security for Version service</li>.
  * </ul>
@@ -111,15 +111,14 @@ public abstract class SecurityConfig {
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 		auth
-				.eraseCredentials(false)
-				// Add an LDAP authentication provider instead of this to support LDAP
-				.userDetailsService(userDetailsService()).and()
-				// Required to allow JWT
-				.authenticationProvider(jwtConfig.jwtAuthenticationProvider());
+			.eraseCredentials(false)
+			// Add an LDAP authentication provider instead of this to support LDAP
+			.userDetailsService(userDetailsService()).and()
+			// Required to allow JWT
+			.authenticationProvider(jwtConfig.jwtAuthenticationProvider());
 	}
 
-	
-	
+
 	/**
 	 * User details service wrapped into an ActiveViam interface.
 	 * <p>
@@ -131,30 +130,30 @@ public abstract class SecurityConfig {
 	public IUserDetailsService avUserDetailsService() {
 		return new UserDetailsServiceWrapper(userDetailsService());
 	}
-	
+
 	/**
-	 * [Bean] Create the users that can access the application
+	 * [Bean] Create the users that can access the application (noop password encoder)
 	 *
 	 * @return {@link UserDetailsService user data}
 	 */
 	@Bean
 	public UserDetailsService userDetailsService() {
 		InMemoryUserDetailsManagerBuilder b = new InMemoryUserDetailsManagerBuilder()
-				.withUser("admin").password("admin").authorities(ROLE_USER, ROLE_ADMIN, ROLE_CS_ROOT).and()
-				.withUser("user").password("user").authorities(ROLE_USER).and();
+				.withUser("admin").password("{noop}admin").authorities(ROLE_USER, ROLE_ADMIN, ROLE_CS_ROOT).and()
+				.withUser("user").password("{noop}user").authorities(ROLE_USER).and();
 
 		return new CompositeUserDetailsService(Arrays.asList(b.build(), technicalUserDetailsService()));
 	}
 
 	/**
 	 * Creates a technical user to allow ActivePivot to connect
-	 * to the content server.
+	 * to the content server. (noop password encoder)
 	 *
 	 * @return {@link UserDetailsService user data}
 	 */
 	protected UserDetailsManager technicalUserDetailsService() {
 		return new InMemoryUserDetailsManagerBuilder()
-				.withUser("pivot").password("pivot").authorities(ROLE_TECH, ROLE_CS_ROOT).and()
+				.withUser("pivot").password("{noop}pivot").authorities(ROLE_TECH, ROLE_CS_ROOT).and()
 				.build();
 	}
 	
