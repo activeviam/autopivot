@@ -30,6 +30,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManagerBuilder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -92,9 +94,13 @@ public abstract class SecurityConfig {
 	/** Content Server Root role */
 	public static final String ROLE_CS_ROOT = IContentService.ROLE_ROOT;
 
-
 	@Autowired
 	protected IJwtConfig jwtConfig;
+
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 
 	/**
 	 * Returns the default {@link AuthenticationEntryPoint} to use
@@ -111,18 +117,19 @@ public abstract class SecurityConfig {
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 		auth
-			.eraseCredentials(false)
-			// Add an LDAP authentication provider instead of this to support LDAP
-			.userDetailsService(userDetailsService()).and()
-			// Required to allow JWT
-			.authenticationProvider(jwtConfig.jwtAuthenticationProvider());
+				.eraseCredentials(false)
+				// Add an LDAP authentication provider instead of this to support LDAP
+				.userDetailsService(userDetailsService())
+				.passwordEncoder(passwordEncoder()).and()
+				// Required to allow JWT
+				.authenticationProvider(jwtConfig.jwtAuthenticationProvider());
 	}
 
 
 	/**
 	 * User details service wrapped into an ActiveViam interface.
 	 * <p>
-	 * This bean is used by {@link ActiveMonitorPivotExtensionServiceConfiguration}
+	 * This bean is used by {@link AutoPivotConfig}
 	 *
 	 * @return a user details service
 	 */
@@ -139,9 +146,8 @@ public abstract class SecurityConfig {
 	@Bean
 	public UserDetailsService userDetailsService() {
 		InMemoryUserDetailsManagerBuilder b = new InMemoryUserDetailsManagerBuilder()
-				.withUser("admin").password("{noop}admin").authorities(ROLE_USER, ROLE_ADMIN, ROLE_CS_ROOT).and()
-				.withUser("user").password("{noop}user").authorities(ROLE_USER).and();
-
+				.withUser("admin").password(passwordEncoder().encode("admin")).authorities(ROLE_USER, ROLE_ADMIN, ROLE_CS_ROOT).and()
+				.withUser("user").password(passwordEncoder().encode("user")).authorities(ROLE_USER).and();
 		return new CompositeUserDetailsService(Arrays.asList(b.build(), technicalUserDetailsService()));
 	}
 
@@ -153,7 +159,7 @@ public abstract class SecurityConfig {
 	 */
 	protected UserDetailsManager technicalUserDetailsService() {
 		return new InMemoryUserDetailsManagerBuilder()
-				.withUser("pivot").password("{noop}pivot").authorities(ROLE_TECH, ROLE_CS_ROOT).and()
+				.withUser("pivot").password(passwordEncoder().encode("pivot")).authorities(ROLE_TECH, ROLE_CS_ROOT).and()
 				.build();
 	}
 	
@@ -356,7 +362,7 @@ public abstract class SecurityConfig {
 	/**
 	 * Only required if the content service is exposed.
 	 * <p>
-	 * Separated from {@link ActivePivotServerSecurityConfig.ActivePivotSecurityConfigurer} to skip the {@link ContextValueFilter}.
+	 * Separated from {@link ActivePivotSecurityConfigurer} to skip the {@link ContextValueFilter}.
 	 * <p>
 	 * Must be done before ActivePivotSecurityConfigurer (because they match common URLs)
 	 *
