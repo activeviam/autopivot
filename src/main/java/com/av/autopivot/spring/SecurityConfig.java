@@ -65,7 +65,7 @@ import com.quartetfs.fwk.security.IUserDetailsService;
  * This class contains methods:
  * <ul>
  * <li>To define authorized users</li>,
- * <li>To enable anomymous user access</li>,
+ * <li>To enable anonymous user access</li>,
  * <li>To configure the JWT filter</li>,
  * <li>To configure the security for Version service</li>.
  * </ul>
@@ -120,14 +120,12 @@ public abstract class SecurityConfig {
 				.eraseCredentials(false)
 				// Add an LDAP authentication provider instead of this to support LDAP
 				.userDetailsService(userDetailsService())
-				.passwordEncoder(passwordEncoder())
-                .and()
+				.passwordEncoder(passwordEncoder()).and()
 				// Required to allow JWT
 				.authenticationProvider(jwtConfig.jwtAuthenticationProvider());
 	}
 
-	
-	
+
 	/**
 	 * User details service wrapped into an ActiveViam interface.
 	 * <p>
@@ -139,9 +137,9 @@ public abstract class SecurityConfig {
 	public IUserDetailsService avUserDetailsService() {
 		return new UserDetailsServiceWrapper(userDetailsService());
 	}
-	
+
 	/**
-	 * [Bean] Create the users that can access the application
+	 * [Bean] Create the users that can access the application (noop password encoder)
 	 *
 	 * @return {@link UserDetailsService user data}
 	 */
@@ -150,13 +148,12 @@ public abstract class SecurityConfig {
 		InMemoryUserDetailsManagerBuilder b = new InMemoryUserDetailsManagerBuilder()
 				.withUser("admin").password(passwordEncoder().encode("admin")).authorities(ROLE_USER, ROLE_ADMIN, ROLE_CS_ROOT).and()
 				.withUser("user").password(passwordEncoder().encode("user")).authorities(ROLE_USER).and();
-
 		return new CompositeUserDetailsService(Arrays.asList(b.build(), technicalUserDetailsService()));
 	}
 
 	/**
 	 * Creates a technical user to allow ActivePivot to connect
-	 * to the content server.
+	 * to the content server. (noop password encoder)
 	 *
 	 * @return {@link UserDetailsService user data}
 	 */

@@ -34,9 +34,7 @@ import org.springframework.security.provisioning.UserDetailsManager;
  *
  * @author ActiveViam
  */
-public class InMemoryUserDetailsManagerBuilder
-		extends
-		UserDetailsManagerConfigurer<AuthenticationManagerBuilder, InMemoryUserDetailsManagerBuilder> {
+public class InMemoryUserDetailsManagerBuilder extends UserDetailsManagerConfigurer<AuthenticationManagerBuilder, InMemoryUserDetailsManagerBuilder> {
 
 	/** Creates a new instance */
 	public InMemoryUserDetailsManagerBuilder() {
@@ -45,8 +43,9 @@ public class InMemoryUserDetailsManagerBuilder
 
 	@Override
 	public void configure(AuthenticationManagerBuilder builder) throws Exception {
-		if (null != builder)
+		if (null != builder) {
 			throw new IllegalArgumentException();
+		}
 		initUserDetailsService();
 	}
 
