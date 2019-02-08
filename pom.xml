@@ -21,9 +21,9 @@
 	</licenses>
 
 	<properties>
-		<activepivot.version>5.7.6</activepivot.version>
-		<activeui.version>4.2.6</activeui.version>
-		<jetty.version>9.4.12.v20180830</jetty.version>
+		<activepivot.version>5.7.7</activepivot.version>
+		<activeui.version>4.2.8</activeui.version>
+		<jetty.version>9.4.14.v20181114</jetty.version>
 	</properties>
 
 	<dependencies>
@@ -82,20 +82,11 @@
 		</dependency>
 		
 		<!-- ActiveUI SDK dependencies -->
+		<!-- ActiveUI dependency -->
 		<dependency>
 			<groupId>com.activeviam.activeui</groupId>
-			<artifactId>activeui-sdk</artifactId>
+			<artifactId>activeui</artifactId>
 			<version>${activeui.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.webjars.npm</groupId>
-			<artifactId>react</artifactId>
-			<version>16.3.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.webjars.npm</groupId>
-			<artifactId>react-dom</artifactId>
-			<version>16.3.1</version>
 		</dependency>
 	</dependencies>
 

@@ -59,7 +59,8 @@ public class ActiveUIResourceServerConfig extends ASpringResourceServerConfig {
 	protected void registerResources(final ResourceRegistry registry) {
 		super.registerResources(registry);
 
-		// ActiveUI web app also serves request to the root, so that the redirection from root to ActiveUI works
+		// ActiveUI web app also serves request to the root, 
+		// so that the redirection from root to ActiveUI works
 		registry.serve("/")
 				.addResourceLocations("/", "classpath:META-INF/resources/")
 				.setCacheControl(getDefaultCacheControl());
@@ -85,17 +86,16 @@ public class ActiveUIResourceServerConfig extends ASpringResourceServerConfig {
 	public Set<String> getServedDirectories() {
 		return QfsArrays.mutableSet("/");
 	}
-
+	
 	@Override
 	public Set<String> getResourceLocations() {
 		// ActiveUI is integrated in the sandbox project thanks to Maven integration.
-		// You can read more about this feature here https://support.activeviam.com/documentation/activeui/4.2.0/dev/setup/maven-integration.html
+		// You can read more about this feature here
+		// https://support.activeviam.com/documentation/activeui/4.2.0/dev/setup/maven-integration.html
 
 		return QfsArrays.mutableSet(
 				"/activeui/", // index.html, favicon.ico, etc.
-				"classpath:META-INF/resources/activeviam/activeui-sdk/", // ActiveUI SDK UMD scripts and supporting assets
-				"classpath:META-INF/resources/webjars/react/16.3.1/umd/",
-				"classpath:META-INF/resources/webjars/react-dom/16.3.1/umd/");
+				"classpath:META-INF/resources/webjars/activeui/"); // ActiveUI assets
 	}
 
 }
