@@ -18,30 +18,52 @@
  */
 package com.av.autopivot.spring;
 
-import java.util.Arrays;
-import java.util.List;
-
-import org.springframework.context.annotation.Configuration;
-
 import com.qfs.security.cfg.impl.ACorsFilterConfig;
+import com.qfs.security.impl.SpringCorsFilter;
+import org.springframework.context.annotation.Bean;
 
-/**
- * Spring configuration for CORS filter for the AutoPivot application
- * <p>
- * In AutoPivot, the CORS filter will allow request from any server.
- * User should modify the method {@link #getAllowedOrigins()}
- * to allow only authorized url(s).
- *
- * @author ActiveViam
- */
-@Configuration
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+
 public class AutoPivotCorsFilterConfig extends ACorsFilterConfig {
 
 	@Override
-	public List<String> getAllowedOrigins() {
-		// Should not be empty in production. Empty means allow all origins.
-		// You should put the url(s) of JavaScript code which must access to ActivePivot REST services
+	public Collection<String> getAllowedOrigins() {
 		return Arrays.asList();
 	}
 
+	@Bean
+	@Override
+	public SpringCorsFilter corsFilter() throws ServletException {
+		final SpringCorsFilter corsFilter = new SpringCorsFilter() {
+			private static final String ALREADY_FILTERED_ATTRIBUTE = "SpringCorsFilter.FILTERED";
+
+			@Override
+			public final void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
+					throws ServletException, IOException {
+
+				boolean hasAlreadyFilteredAttribute = request.getAttribute(ALREADY_FILTERED_ATTRIBUTE) != null;
+
+				if (hasAlreadyFilteredAttribute) {
+					filterChain.doFilter(request, response);
+				} else {
+					// Do invoke this filter...
+					request.setAttribute(ALREADY_FILTERED_ATTRIBUTE, Boolean.TRUE);
+					try {
+						super.doFilter(request, response, filterChain);
+					} finally {
+						// Remove the "already filtered" request attribute for this request.
+						request.removeAttribute(ALREADY_FILTERED_ATTRIBUTE);
+					}
+				}
+			}
+		};
+		corsFilter.init(getCorsFilterConfig());
+		return corsFilter;
+	}
 }

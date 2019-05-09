@@ -38,10 +38,6 @@ import com.quartetfs.biz.pivot.definitions.IActivePivotManagerDescription;
  *
  * @author ActiveViam
  */
-@Import(value={
-		LocalI18nConfig.class, // (I18n) Cube translation is set up from the file system
-		ActiveUIResourceServerConfig.class, // (ActiveUI) Expose the ActiveUI web application
-})
 @Configuration
 public class ContentServiceConfig implements IActivePivotContentServiceConfig {
 
@@ -64,8 +60,6 @@ public class ContentServiceConfig implements IActivePivotContentServiceConfig {
 				.withoutCache()
 				.needInitialization(SecurityConfig.ROLE_USER, SecurityConfig.ROLE_USER)
 				.withDescription(manager)
-				// Push the context values stored in ROLE-INF directory
-				.withContextValues("ROLE-INF")
 				.build();
 	}
 
