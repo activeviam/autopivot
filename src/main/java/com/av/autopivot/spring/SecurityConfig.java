@@ -77,9 +77,6 @@ import com.quartetfs.fwk.security.IUserDetailsService;
 @Configuration
 public abstract class SecurityConfig {
 
-	/** Set to true to allow anonymous access */
-	public static final boolean useAnonymous = false;
-
 	public static final String BASIC_AUTH_BEAN_NAME = "basicAuthenticationEntryPoint";
 
 	/** Admin user */
@@ -242,12 +239,6 @@ public abstract class SecurityConfig {
 						.deleteCookies(cookieName)
 						.invalidateHttpSession(true)
 						.logoutSuccessHandler(new NoRedirectLogoutSuccessHandler());
-			}
-
-			if (useAnonymous) {
-				// Handle anonymous users. The granted authority ROLE_USER
-				// will be assigned to the anonymous request
-				http.anonymous().principal("guest").authorities(ROLE_USER);
 			}
 
 			doConfigure(http);
