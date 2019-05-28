@@ -21,14 +21,12 @@ package com.av.autopivot.spring;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 import com.qfs.content.cfg.impl.ContentServerRestServicesConfig;
 import com.qfs.content.service.IContentService;
 import com.qfs.pivot.content.IActivePivotContentService;
 import com.qfs.pivot.content.impl.ActivePivotContentServiceBuilder;
 import com.qfs.server.cfg.content.IActivePivotContentServiceConfig;
-import com.qfs.server.cfg.i18n.impl.LocalI18nConfig;
 import com.quartetfs.biz.pivot.definitions.IActivePivotManagerDescription;
 
 /**

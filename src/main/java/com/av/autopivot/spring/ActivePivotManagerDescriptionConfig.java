@@ -19,6 +19,8 @@
 package com.av.autopivot.spring;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 import com.av.autopivot.AutoPivotGenerator;
@@ -36,6 +38,7 @@ import com.quartetfs.biz.pivot.definitions.IActivePivotManagerDescription;
  * @author ActiveViam
  *
  */
+@Configuration
 public class ActivePivotManagerDescriptionConfig implements IActivePivotManagerDescriptionConfig {
 
 	/** Spring environment */
@@ -50,6 +53,7 @@ public class ActivePivotManagerDescriptionConfig implements IActivePivotManagerD
 	@Autowired
 	protected DatastoreDescriptionConfig datastoreConfig;
 
+	@Bean
 	@Override
 	public IActivePivotManagerDescription managerDescription() {
 

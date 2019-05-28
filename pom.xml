@@ -16,44 +16,28 @@
 	</licenses>
 
 	<properties>
-    <activepivot.version>5.7.8</activepivot.version>
-		<activeui.version>4.2.10</activeui.version>
-		<spring.boot.version>2.1.2.RELEASE</spring.boot.version>
+		<activepivot.version>5.7.9</activepivot.version>
+		<activeui.version>4.2.11</activeui.version>
+		<spring.boot.version>2.1.5.RELEASE</spring.boot.version>
 	</properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <!-- Import dependency management from Spring Boot -->
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring.boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>com.activeviam.activepivot</groupId>
-                <artifactId>activepivot-server-spring</artifactId>
-                <version>${activepivot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
 	<dependencies>
+	
+		<!-- Spring Boot Dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+			<version>${spring.boot.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+			<version>${spring.boot.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+			<version>${spring.boot.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -63,24 +47,14 @@
             <artifactId>activepivot-server-spring</artifactId>
             <version>${activepivot.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.activeviam.activepivot</groupId>
             <artifactId>activepivot-test</artifactId>
             <version>${activepivot.version}</version>
             <scope>test</scope>
         </dependency>
-		
-        <!-- Dependencies for the content service persistence -->
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-        </dependency>
-		
+
+		<!-- ActiveUI Dependencies -->
 		<dependency>
 			<groupId>com.activeviam.activeui</groupId>
 			<artifactId>activeui</artifactId>
