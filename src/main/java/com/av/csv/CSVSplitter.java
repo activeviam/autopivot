@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,32 +22,32 @@ import java.util.Arrays;
 import java.util.logging.Logger;
 
 /**
- * 
+ *
  * Logic to split the fields of a CSV text row.
- * 
+ *
  * @author ActiveViam
  *
  */
 public class CSVSplitter {
-	
+
 	/** Logger */
 	private static final Logger LOGGER = Logger.getLogger(CSVSplitter.class.getName());
-	
+
 	public static String[] split(String text, String separator) {
-		
+
 		if(separator == null || separator.length() != 1) {
 			throw new IllegalArgumentException("Cannot split text, unsupported separator: " + separator);
 		}
-		char sep = separator.charAt(0);
-		char dq = '"';
-		
+		final char sep = separator.charAt(0);
+		final char dq = '"';
+
 		int fieldCount = 1;
-		
+
 		boolean withinQuotes = false;
 
 		// First pass, count fields
 		for(int c = 0; c < text.length(); c++) {
-			char current = text.charAt(c);
+			final char current = text.charAt(c);
 			if(dq == current) {
 				// double quote detected, is this the beginning of a field?
 				if(c == 0 || sep == text.charAt(c-1)) {
@@ -69,13 +69,13 @@ public class CSVSplitter {
 				}
 			}
 		}
-		
+
 		// Second pass, extract fields
-		String[] fields = new String[fieldCount];
+		final String[] fields = new String[fieldCount];
 		fieldCount = 0;
 		int fieldStart = 0;
 		for(int c = 0; c < text.length(); c++) {
-			char current = text.charAt(c);
+			final char current = text.charAt(c);
 			if(dq == current) {
 				// double quote detected, is this the beginning of a field?
 				if(c == 0 || sep == text.charAt(c-1)) {
@@ -86,10 +86,10 @@ public class CSVSplitter {
 				else if((c == text.length()-1) || (sep == text.charAt(c+1))) {
 					withinQuotes = false;
 				}
-				
+
 				if(c == text.length()-1) {
 					// End of row
-					fields[fieldCount] = text.substring(fieldStart+1, c-1);
+					fields[fieldCount] = text.substring(fieldStart+1, c);
 				}
 			} else if(sep == current) {
 				if(withinQuotes) {
@@ -105,23 +105,28 @@ public class CSVSplitter {
 					fieldCount++;
 					fieldStart = c+1;
 				}
+
+				if(c == text.length()-1) {
+					// End of row, the last column is empty
+					fields[fieldCount] = "";
+				}
 			} else if(c == text.length()-1) {
 				// End of row, field without double quotes
 				fields[fieldCount] = text.substring(fieldStart, text.length());
 			}
 		}
-		
+
 		return fields;
 	}
-	
-	
+
+
 	public static void main(String[] params) {
-		
-		String text = "\"2\",\"Allison, Miss Helen \"Loraine\"\",\"1st\",2,\"female\",0,1";
+
+		final String text = "\"2\",\"Allison, Miss Helen \"Loraine\"\",\"1st\",2,\"female\",0,1";
+
 		System.out.println(text);
-		
+
 		System.out.println(Arrays.asList(split(text, ",")));
-		
 	}
-	
+
 }
