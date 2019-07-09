@@ -18,7 +18,7 @@
  */
 package com.av.autopivot.spring;
 
-
+import static com.av.csv.discover.CSVDiscovery.isDate;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
@@ -160,7 +160,7 @@ public class SourceConfig {
 			
 			// When a date field is detected, we automatically
 			// calculate the YEAR, MONTH and DAY fields.
-			if(columnType.startsWith("DATE")) {
+			if(isDate(columnType)) {
 				calculatedColumns.add(new DateYearCalculator(columnName, columnName + ".YEAR"));
 				calculatedColumns.add(new DateMonthCalculator(columnName, columnName + ".MONTH"));
 				calculatedColumns.add(new DateDayCalculator(columnName, columnName + ".DAY"));

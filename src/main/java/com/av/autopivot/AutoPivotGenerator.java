@@ -18,6 +18,8 @@
  */
 package com.av.autopivot;
 
+import static com.av.csv.discover.CSVDiscovery.isDate;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -102,9 +104,6 @@ public class AutoPivotGenerator {
 	/** Default format for integer measures */
 	public static final String INTEGER_FORMAT = "INT[#,###;-#,###]";
 	
-	/** Default format for date levels */
-	public static final String DATE_FORMAT = "DATE[yyyy-MM-dd]";
-	
 	/** Default format for time levels */
 	public static final String TIME_FORMAT = "DATE[HH:mm:ss]";	
 
@@ -126,10 +125,10 @@ public class AutoPivotGenerator {
 			FieldDescription desc = new FieldDescription(columnName, columnType);
 
 			// For date fields automatically add YEAR - MONTH - DAY fields
-			if(columnType.startsWith("DATE")) {
+			if(isDate(columnType)) {
 				FieldDescription year = new FieldDescription(columnName + ".YEAR", "int");
 				optimizations.add(new OptimizationDescription(year.getName(), Optimization.DICTIONARY));
-				FieldDescription month = new FieldDescription(columnName + ".MONTH", "string");
+				FieldDescription month = new FieldDescription(columnName + ".MONTH", "int");
 				optimizations.add(new OptimizationDescription(month.getName(), Optimization.DICTIONARY));
 				FieldDescription day = new FieldDescription(columnName + ".DAY", "int");
 				optimizations.add(new OptimizationDescription(day.getName(), Optimization.DICTIONARY));
@@ -141,7 +140,7 @@ public class AutoPivotGenerator {
 
 			// Dictionarize objects and integers so they can be used
 			// as ActivePivot levels.
-			if(columnType.startsWith("DATE")
+			if(isDate(columnType)
 					|| "int".equalsIgnoreCase(columnType)
 					|| "String".equalsIgnoreCase(columnType)) {
 				optimizations.add(new OptimizationDescription(columnName, Optimization.DICTIONARY));
@@ -259,14 +258,13 @@ public class AutoPivotGenerator {
 				dimensions.addValues(Arrays.asList(dimension));
 				
 				// For date fields generate the YEAR-MONTH-DAY hierarchy
-				if(fieldType.startsWith("DATE")) {
+				if(isDate(fieldType)) {
 					dimension.setDimensionType(DimensionType.TIME);
 					
 					List<IAxisHierarchyDescription> hierarchies = new ArrayList<>();
 					IAxisHierarchyDescription hierarchy = new AxisHierarchyDescription(fieldName);
 					hierarchy.setDefaultHierarchy(true);
 					IAxisLevelDescription dateLevel = new AxisLevelDescription(fieldName);
-					dateLevel.setFormatter(DATE_FORMAT);
 					dateLevel.setLevelType(LevelType.TIME);
 					hierarchy.setLevels(Arrays.asList(dateLevel));
 					hierarchies.add(hierarchy);
@@ -414,7 +412,7 @@ public class AutoPivotGenerator {
 			String fieldType = format.getColumnType(f);
 			fields.add(new SelectionField(fieldName));
 			
-			if(fieldType.startsWith("DATE")) {
+			if(isDate(fieldType)) {
 				fields.add(new SelectionField(fieldName + ".YEAR"));
 				fields.add(new SelectionField(fieldName + ".MONTH"));
 				fields.add(new SelectionField(fieldName + ".DAY"));
@@ -452,5 +450,5 @@ public class AutoPivotGenerator {
 		desc.setSchemas(Arrays.asList(instance));
 		return desc;
 	}
-
+	
 }

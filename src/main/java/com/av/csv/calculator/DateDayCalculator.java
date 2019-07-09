@@ -18,7 +18,8 @@
  */
 package com.av.csv.calculator;
 
-import java.util.Calendar;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAccessor;
 
 /**
  * 
@@ -34,8 +35,8 @@ public class DateDayCalculator extends ADateFieldCalculator {
 	}
 
 	@Override
-	protected Object compute(Calendar calendar) {
-		return calendar.get(Calendar.DAY_OF_MONTH);
+	protected Object compute(TemporalAccessor date) {
+		return date.get(ChronoField.DAY_OF_MONTH);
 	}
 
 }

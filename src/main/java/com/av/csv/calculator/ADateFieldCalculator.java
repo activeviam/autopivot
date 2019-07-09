@@ -18,8 +18,7 @@
  */
 package com.av.csv.calculator;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.time.temporal.TemporalAccessor;
 
 import com.qfs.msg.csv.ILineReader;
 import com.qfs.msg.csv.translator.impl.AColumnCalculator;
@@ -43,13 +42,11 @@ public abstract class ADateFieldCalculator extends AColumnCalculator<ILineReader
 
 	@Override
 	public Object compute(IColumnCalculationContext<ILineReader> context) {
-		Date date = (Date) context.getValue(this.baseColumnName);
+		TemporalAccessor date = (TemporalAccessor) context.getValue(this.baseColumnName);
 		if(date == null) return null;
-		Calendar cal =  Calendar.getInstance();
-		cal.setTime(date);
-		return compute(cal);
+		return compute(date);
 	}
 	
-	protected abstract Object compute(Calendar calendar);
+	protected abstract Object compute(TemporalAccessor date);
 
 }

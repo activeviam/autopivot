@@ -96,23 +96,35 @@ public class CSVDiscovery {
 
 		@SuppressWarnings("rawtypes")
 		IPlugin<IParser> plugin = Registry.getPlugin(IParser.class);
-
+		
 		return Stream.<IParser<?>>of(
 				plugin.valueOf("int"),
 				plugin.valueOf("long"),
 				plugin.valueOf("double"),
-				plugin.valueOf("DATE[yyyy-MM-dd]"),
-				plugin.valueOf("DATE[yyyy/MM/dd]"),
-				plugin.valueOf("DATE[MM-dd-yyyy]"),
-				plugin.valueOf("DATE[MM/dd/yyyy]"),
-				plugin.valueOf("DATE[dd-MM-yyyy]"),
-				plugin.valueOf("DATE[dd/MM/yyyy]"),
-				plugin.valueOf("DATE[d-MMM-yyyy]"),
-				plugin.valueOf("DATE[EEE MMM dd HH:mm:ss zzzz yyyy]"))
+				plugin.valueOf("LOCALDATE[yyyy-MM-dd]"),
+				plugin.valueOf("LOCALDATE[yyyy/MM/dd]"),
+				plugin.valueOf("LOCALDATE[MM-dd-yyyy]"),
+				plugin.valueOf("LOCALDATE[MM/dd/yyyy]"),
+				plugin.valueOf("LOCALDATE[dd-MM-yyyy]"),
+				plugin.valueOf("LOCALDATE[dd/MM/yyyy]"),
+				plugin.valueOf("LOCALDATE[d-MMM-yyyy]"),
+				plugin.valueOf("ZONEDDATETIME[EEE MMM dd HH:mm:ss zzz yyyy]"))
 				.collect(toList());
 	}
 
-
+	/**
+	 * 
+	 * Determine if a field type is of date type.
+	 * 
+	 * @param fieldType
+	 * @return boolean
+	 */
+	public static boolean isDate(String fieldType) {
+		return fieldType.startsWith("DATE") ||
+			fieldType.startsWith("LocalDate") ||
+			fieldType.startsWith("ZonedDate");
+	}
+	
 	/**
 	 * 
 	 * Discover the CSV format of a CSV file.

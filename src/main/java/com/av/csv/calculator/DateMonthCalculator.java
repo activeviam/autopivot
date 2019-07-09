@@ -19,7 +19,8 @@
 package com.av.csv.calculator;
 
 import java.text.DateFormatSymbols;
-import java.util.Calendar;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAccessor;
 
 /**
  * 
@@ -40,8 +41,8 @@ public class DateMonthCalculator extends ADateFieldCalculator {
 	}
 
 	@Override
-	protected Object compute(Calendar calendar) {
-		return this.months[calendar.get(Calendar.MONTH)];
+	protected Object compute(TemporalAccessor date) {
+		return date.get(ChronoField.MONTH_OF_YEAR);
 	}
 	
 }
