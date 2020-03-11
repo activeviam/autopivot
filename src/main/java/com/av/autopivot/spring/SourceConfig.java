@@ -142,6 +142,7 @@ public class SourceConfig {
 				discovery.getSeparator().charAt(0),
 				discovery.getColumnCount(),
 				true,
+				true,
 				1,
 				CSVParserConfiguration.toMap(discovery.getColumnNames()));
 		configuration.setProcessQuotes(true);
