@@ -172,14 +172,17 @@ public class CSVDiscovery {
 			List<String> content = lines.subList(1, lines.size());
 			List<List<String>> columns = toColumns(content, separator);
 			List<String> types = new ArrayList<>(columns.size());
+			boolean quoteProcessing = false;
 			for(List<String> column : columns) {
 				String type = detectType(column);
 				types.add(type);
+				boolean qp = detectQuoteProcessing(column);
+				quoteProcessing = quoteProcessing || qp;
 			}
 
 			LOG.info("Detected types: " + types);
 			
-			return new CSVFormat(separator, headers, types);
+			return new CSVFormat(separator, headers, types, quoteProcessing);
 		}
 	}
 
@@ -234,6 +237,25 @@ public class CSVDiscovery {
 		
 		// Default
 		return "String";
+	}
+	
+	/**
+	 * Use several text samples of a field to detect whether quote
+	 * processing should be enabled.
+	 * <br>
+	 * Quote processing must be enabled if at least one sample
+	 * appears to be surrounded by quotes.
+	 * 
+	 * @param fields
+	 * @return true if quote processing is necessary
+	 */
+	public boolean detectQuoteProcessing(List<String> fields) {
+		for(String field : fields) {
+			if(field != null && field.startsWith("\"") && field.endsWith("\"")) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 

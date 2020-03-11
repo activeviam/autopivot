@@ -38,11 +38,15 @@ public class CSVFormat {
 	/** Column types */
 	protected final List<String> columnTypes;
 	
+	/** Quote processing */
+	protected final boolean quoteProcessing;
 	
-	public CSVFormat(String separator, List<String> columnNames, List<String> columnTypes) {
+	
+	public CSVFormat(String separator, List<String> columnNames, List<String> columnTypes, boolean quoteProcessing) {
 		this.separator = separator;
 		this.columnNames = columnNames;
 		this.columnTypes = columnTypes;
+		this.quoteProcessing = quoteProcessing;
 	}
 
 	public String getSeparator() { return separator; }
@@ -50,6 +54,8 @@ public class CSVFormat {
 	public List<String> getColumnNames() { return columnNames; }
 	
 	public int getColumnCount() { return columnNames.size(); }
+	
+	public boolean getQuoteProcessing() { return quoteProcessing; }
 	
 	public String getColumnName(int columnIndex) {
 		return columnNames.get(columnIndex);
