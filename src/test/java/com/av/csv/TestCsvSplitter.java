@@ -61,5 +61,11 @@ public class TestCsvSplitter {
 		Assertions.assertThat(split("a,\"b,c,d\",e", ",")).containsExactly("a", "b,c,d", "e");
 		Assertions.assertThat(split("\"a\",\"b\",\"c\"", ",")).containsExactly("a", "b", "c");
 		Assertions.assertThat(split("a,\"\"b\"\",c", ",")).containsExactly("a", "\"b\"", "c");
+		Assertions.assertThat(split("a,\"b,c,\",d", ",")).containsExactly("a", "b,c,", "d");
+	}
+
+	@Test
+	public void testDoubleQuotesWithinField() {
+		Assertions.assertThat(split("a,b\"b,c", ",")).containsExactly("a", "b\"b", "c");
 	}
 }

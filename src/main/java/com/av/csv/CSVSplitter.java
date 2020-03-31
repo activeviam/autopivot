@@ -33,90 +33,145 @@ public class CSVSplitter {
 	/** Logger */
 	private static final Logger LOGGER = Logger.getLogger(CSVSplitter.class.getName());
 
+	/** Double quotes character */
+	static final char DQ = '"';
+
+	/**
+	 * Detect if quotes are used in this CSV row.
+	 * @param text
+	 * @return true is at least one field was quoted
+	 */
+	public static boolean containsQuotedField(String text, String separator) {
+		if(separator == null || separator.length() != 1) {
+			throw new IllegalArgumentException("Cannot split text, unsupported separator: " + separator);
+		}
+		final char sep = separator.charAt(0);
+
+		int fieldStart = 0;
+		int nbQuotes = 0;
+
+		// First pass, count fields
+		for(int c = 0; c < text.length(); c++) {
+			final char current = text.charAt(c);
+			if (sep == current) {
+				if (nbQuotes == 0) {
+					// Standard field
+					fieldStart = c + 1;
+				} else if (DQ == text.charAt(fieldStart)) {
+					// current field is quoted
+					return true;
+				} else {
+					// quotes used in the middle of a standard field
+					// dirty but we can live with it
+					fieldStart = c + 1;
+					nbQuotes = 0;
+				}
+			} else if (DQ == current) {
+				nbQuotes++;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Split a CSV row into String fields
+	 * @param text
+	 * @param separator
+	 * @return array of fields
+	 */
 	public static String[] split(String text, String separator) {
 
 		if(separator == null || separator.length() != 1) {
 			throw new IllegalArgumentException("Cannot split text, unsupported separator: " + separator);
 		}
 		final char sep = separator.charAt(0);
-		final char dq = '"';
 
+		int fieldStart = 0;
 		int fieldCount = 1;
-
-		boolean withinQuotes = false;
+		int nbQuotes = 0;
 
 		// First pass, count fields
 		for(int c = 0; c < text.length(); c++) {
 			final char current = text.charAt(c);
-			if(dq == current) {
-				// double quote detected, is this the beginning of a field?
-				if(c == 0 || sep == text.charAt(c-1)) {
-					// Beginning of a new field, delimited by quotes
-					withinQuotes = true;
-				}
-				// or else is it the end of a field?
-				else if((c == text.length()-1) || (sep == text.charAt(c+1))) {
-					if(!withinQuotes) {
-						LOGGER.warning("Unexpected double quote character at the end of a field: " + text);
-					}
-					withinQuotes = false;
-				}
-			} else if(sep == current) {
-				if(withinQuotes) {
-					// In the middle of a field, not a split
-				} else {
+			if(sep == current) {
+				if(nbQuotes == 0) {
+					// Standard field
 					fieldCount++;
+					fieldStart = c+1;
+				} else if (DQ == text.charAt(fieldStart)) {
+					// current field is quoted
+					if ((DQ == text.charAt(c - 1)) && isEven(nbQuotes)) {
+						// Properly quoted field
+						fieldCount++;
+						fieldStart = c+1;
+						nbQuotes = 0;
+					} else {
+						// In the middle of a quoted field
+					}
+				} else {
+					// quotes used in the middle of a standard field
+					// dirty but we can live with it
+					fieldCount++;
+					fieldStart = c+1;
+					nbQuotes = 0;
 				}
+			} else if(DQ == current) {
+				nbQuotes++;
 			}
 		}
 
 		// Second pass, extract fields
 		final String[] fields = new String[fieldCount];
-		fieldCount = 0;
-		int fieldStart = 0;
+		int fieldIndex = 0;
+		nbQuotes = 0;
+		fieldStart = 0;
 		for(int c = 0; c < text.length(); c++) {
 			final char current = text.charAt(c);
-			if(dq == current) {
-				// double quote detected, is this the beginning of a field?
-				if(c == 0 || sep == text.charAt(c-1)) {
-					// Beginning of a new field, delimited by quotes
-					withinQuotes = true;
-				}
-				// or else is it the end of a field?
-				else if((c == text.length()-1) || (sep == text.charAt(c+1))) {
-					withinQuotes = false;
-				}
 
-				if(c == text.length()-1) {
-					// End of row
-					fields[fieldCount] = text.substring(fieldStart+1, c);
-				}
-			} else if(sep == current) {
-				if(withinQuotes) {
-					// In the middle of a field, not a split
-				} else {
-					String field;
-					if(dq == text.charAt(fieldStart)) {
-						field = text.substring(fieldStart+1, c-1);
-					} else {
-						field = text.substring(fieldStart, c);
-					}
-					fields[fieldCount] = field;
-					fieldCount++;
+			if(sep == current) {
+				if(nbQuotes == 0) {
+					// standard field
+					fields[fieldIndex++] = text.substring(fieldStart, c);
 					fieldStart = c+1;
+				} else if(DQ == text.charAt(fieldStart)) {
+					if(DQ == text.charAt(c-1) && isEven(nbQuotes)) {
+						// Properly quoted field
+						fields[fieldIndex++] = text.substring(fieldStart + 1, c - 1);
+						fieldStart = c + 1;
+						nbQuotes = 0;
+					}
+					// Else in the middle of a quoted field
+				} else {
+					// quotes used in the middle of a standard field
+					// dirty but we can live with it
+					fields[fieldIndex++] = text.substring(fieldStart, c);
+					fieldStart = c + 1;
+					nbQuotes = 0;
 				}
+			} else if(DQ == current) {
+				nbQuotes++;
+			}
+		}
 
-				if(c == text.length()-1) {
-					// End of row, the last column is empty
-					fields[fieldCount] = "";
-				}
-			} else if(c == text.length()-1) {
-				// End of row, field without double quotes
-				fields[fieldCount] = text.substring(fieldStart, text.length());
+		// End of the row, extract the last field of the row
+		if(nbQuotes == 0) {
+			// standard field, possibly empty
+			fields[fieldIndex++] = text.substring(fieldStart, text.length());
+		} else if(DQ == text.charAt(fieldStart)) {
+			if(DQ == text.charAt(text.length()-1) && isEven(nbQuotes)) {
+				// Field seems properly quoted
+				fields[fieldIndex++] = text.substring(fieldStart + 1, text.length() - 1);
+			} else {
+				// dirty quoted field that is left open
+				fields[fieldIndex++] = text.substring(fieldStart + 1, text.length());
 			}
 		}
 
 		return fields;
+	}
+
+	public static boolean isEven(int i) {
+		return i % 2 == 0;
 	}
 
 
