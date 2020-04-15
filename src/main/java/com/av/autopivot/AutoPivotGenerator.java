@@ -399,7 +399,8 @@ public class AutoPivotGenerator {
 	
 	/**
 	 * 
-	 * @param storeDesc
+	 * @param format format of the CSV file
+	 * @param env spring environment
 	 * @return schema description
 	 */
 	public IActivePivotSchemaDescription createActivePivotSchemaDescription(CSVFormat format, Environment env) {
