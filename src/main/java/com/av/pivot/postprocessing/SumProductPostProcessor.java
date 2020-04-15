@@ -21,13 +21,13 @@ package com.av.pivot.postprocessing;
 import java.util.Arrays;
 import java.util.Properties;
 
+import com.activeviam.fwk.ActiveviamException;
 import com.qfs.store.record.IRecordReader;
 import com.quartetfs.biz.pivot.ILocation;
 import com.quartetfs.biz.pivot.cube.hierarchy.measures.IPostProcessorCreationContext;
 import com.quartetfs.biz.pivot.postprocessing.IPostProcessor;
 import com.quartetfs.biz.pivot.postprocessing.PostProcessorInitializationException;
 import com.quartetfs.biz.pivot.postprocessing.impl.ADynamicAggregationPostProcessor;
-import com.quartetfs.fwk.QuartetException;
 import com.quartetfs.fwk.QuartetExtendedPluginValue;
 
 /**
@@ -61,7 +61,7 @@ public class SumProductPostProcessor extends ADynamicAggregationPostProcessor<Do
 	public String getType() { return PLUGIN_TYPE; }
 	
 	@Override
-	public void init(Properties properties) throws QuartetException {
+	public void init(Properties properties) throws ActiveviamException {
 		super.init(properties);
 		if(this.underlyingMeasures == null || this.underlyingMeasures.length != 2) {
 			throw new PostProcessorInitializationException("Expecting exactly two underlying measures, got " + Arrays.toString(this.underlyingMeasures));

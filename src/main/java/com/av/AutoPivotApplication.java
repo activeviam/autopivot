@@ -18,10 +18,13 @@
  */
 package com.av;
 
+import com.av.autopivot.spring.CookieUtil;
+import com.av.autopivot.spring.SecurityConfig;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletRegistrationBean;
+import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.DispatcherServlet;
 
@@ -48,6 +51,15 @@ public class AutoPivotApplication {
         registration.setLoadOnStartup(1);
         multipartConfig.ifAvailable(registration::setMultipartConfig);
         return registration;
+    }
+
+    @Bean
+    public ServletContextInitializer servletContextInitializer() {
+        return servletContext -> {
+            CookieUtil.configure(
+                    servletContext.getSessionCookieConfig(),
+                    SecurityConfig.COOKIE_NAME);
+        };
     }
 
 }

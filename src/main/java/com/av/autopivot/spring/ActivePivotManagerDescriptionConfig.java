@@ -18,6 +18,9 @@
  */
 package com.av.autopivot.spring;
 
+import com.qfs.desc.IDatastoreSchemaDescription;
+import com.qfs.desc.IStoreDescription;
+import com.qfs.desc.impl.DatastoreSchemaDescription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +30,10 @@ import com.av.autopivot.AutoPivotGenerator;
 import com.av.csv.CSVFormat;
 import com.qfs.server.cfg.IActivePivotManagerDescriptionConfig;
 import com.quartetfs.biz.pivot.definitions.IActivePivotManagerDescription;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
 
 /**
  * 
@@ -49,21 +56,38 @@ public class ActivePivotManagerDescriptionConfig implements IActivePivotManagerD
 	@Autowired
 	protected SourceConfig sourceConfig;
 
-	/** Datastore configuration */
-	@Autowired
-	protected DatastoreDescriptionConfig datastoreConfig;
-
 	@Bean
 	@Override
-	public IActivePivotManagerDescription managerDescription() {
-
+	public IActivePivotManagerDescription userManagerDescription() {
 		CSVFormat discovery = sourceConfig.discoverFile();
 
-		AutoPivotGenerator generator = datastoreConfig.generator();
+		AutoPivotGenerator generator = generator();
 		IActivePivotManagerDescription manager =
 				generator.createActivePivotManagerDescription(discovery, env);
 
 		return manager;
+	}
+
+	/**
+	 *
+	 * Generator of store and cube descriptions.
+	 *
+	 * @return ActivePivot generator
+	 */
+	@Bean
+	public AutoPivotGenerator generator() {
+		return new AutoPivotGenerator();
+	}
+
+	@Bean
+	@Override
+	public IDatastoreSchemaDescription userSchemaDescription() {
+		CSVFormat discovery = sourceConfig.discoverFile();
+		AutoPivotGenerator generator = generator();
+
+		final Collection<IStoreDescription> stores = new LinkedList<>();
+		stores.add(generator.createStoreDescription(discovery, env));
+		return new DatastoreSchemaDescription(stores, Collections.emptyList());
 	}
 
 }

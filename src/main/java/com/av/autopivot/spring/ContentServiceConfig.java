@@ -18,7 +18,10 @@
  */
 package com.av.autopivot.spring;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.qfs.content.service.impl.InMemoryContentService;
+import com.quartetfs.biz.pivot.context.IContextValue;
+import com.quartetfs.biz.pivot.definitions.ICalculatedMemberDescription;
+import com.quartetfs.biz.pivot.definitions.IKpiDescription;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -27,7 +30,6 @@ import com.qfs.content.service.IContentService;
 import com.qfs.pivot.content.IActivePivotContentService;
 import com.qfs.pivot.content.impl.ActivePivotContentServiceBuilder;
 import com.qfs.server.cfg.content.IActivePivotContentServiceConfig;
-import com.quartetfs.biz.pivot.definitions.IActivePivotManagerDescription;
 
 /**
  * Spring configuration of the <b>Content Service</b> backed by a local <b>Content Server</b>.
@@ -39,33 +41,41 @@ import com.quartetfs.biz.pivot.definitions.IActivePivotManagerDescription;
 @Configuration
 public class ContentServiceConfig implements IActivePivotContentServiceConfig {
 
-	/** ActivePivot Manager Configuration */
-	@Autowired
-	protected ActivePivotManagerDescriptionConfig managerConfig;
+	/** Role needed to create calculated members */
+	private static final String CALCULATED_MEMBER_ROLE = SecurityConfig.ROLE_USER;
+
+	/** Role needed to create KPIs */
+	private static final String KPI_ROLE = SecurityConfig.ROLE_USER;
+
 
 	/**
-	 * @return ActivePivot content service used to store context
-	 * values, calculated members, and ActiveUI settings and bookmarks.
+	 * Service used to store the ActivePivot descriptions and the entitlements (i.e.
+	 * {@link IContextValue context values}, {@link ICalculatedMemberDescription calculated members}
+	 * and {@link IKpiDescription KPIs}).
+	 *
+	 * @return the {@link IActivePivotContentService content service} used by the Sandbox
+	 *         application
 	 */
 	@Bean
 	@Override
 	public IActivePivotContentService activePivotContentService() {
-
-		IActivePivotManagerDescription manager = managerConfig.managerDescription();
-		
 		return new ActivePivotContentServiceBuilder()
-				.withoutPersistence()
-				.withoutCache()
-				.needInitialization(SecurityConfig.ROLE_USER, SecurityConfig.ROLE_USER)
-				.withDescription(manager)
+				.with(contentService())
+				.withCacheForEntitlements(-1)
+
+				// Setup directories and permissions
+				.needInitialization(CALCULATED_MEMBER_ROLE, KPI_ROLE)
 				.build();
 	}
 
-	@Bean
+	/**
+	 * [Bean] Content Service bean
+	 * @return in memory content service
+	 */
 	@Override
+	@Bean
 	public IContentService contentService() {
-		// Return the real content service used by the activePivotContentService instead of the wrapped one
-		return activePivotContentService().getContentService().getUnderlying();
+		return new InMemoryContentService();
 	}
 
 }

@@ -87,11 +87,9 @@ value = {
 		StreamingMonitorConfig.class,
 
 		ActivePivotManagerDescriptionConfig.class,
-		DatastoreDescriptionConfig.class,
 		ContentServiceConfig.class,
 		SourceConfig.class,
 		SecurityConfig.class,
-		AutoPivotCorsFilterConfig.class,
 
 		// ActiveUI resource server configuration
 		ActiveUIResourceServerConfig.class,

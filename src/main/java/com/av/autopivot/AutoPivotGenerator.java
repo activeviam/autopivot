@@ -295,10 +295,10 @@ public class AutoPivotGenerator {
 			String fieldType = format.getColumnType(f);
 			if(numerics.contains(fieldType) && !fieldName.endsWith("id") && !fieldName.endsWith("ID")) {
 				
-				// For each numerical input value, create aggregations for SUM, min, max
+				// For each numerical input value, create aggregations for SUM, MIN, MAX
 				AggregatedMeasureDescription sum = new AggregatedMeasureDescription(fieldName, "SUM");
-				AggregatedMeasureDescription min = new AggregatedMeasureDescription(fieldName, "min");
-				AggregatedMeasureDescription max = new AggregatedMeasureDescription(fieldName, "max");
+				AggregatedMeasureDescription min = new AggregatedMeasureDescription(fieldName, "MIN");
+				AggregatedMeasureDescription max = new AggregatedMeasureDescription(fieldName, "MAX");
 				AggregatedMeasureDescription sq_sum = new AggregatedMeasureDescription(fieldName, "SQ_SUM");
 				sq_sum.setVisible(false);
 				
