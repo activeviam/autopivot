@@ -107,7 +107,7 @@ public class SourceConfig {
 			try {
 				return Charset.forName(charsetName);
 			} catch(Exception e) {
-				LOGGER.warning("Unkown charset: " + charsetName);
+				LOGGER.warning("Unknown charset: " + charsetName);
 			}
 		}
 		return Charset.defaultCharset();
