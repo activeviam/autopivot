@@ -151,7 +151,7 @@ public class CSVDiscovery {
 		LOG.info("Detecting CSV parser configuration for file " + fileName);
 		
 		InputStream is = openFile(fileName);
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, charset))) {
 			List<String> lines = reader.lines().limit(1000L).collect(Collectors.toList());
 			if(lines.size() <= 0) {
 				throw new QuartetRuntimeException("Cannot process empty file: " + fileName);
