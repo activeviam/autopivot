@@ -28,17 +28,16 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.IntSummaryStatistics;
-import java.util.List;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.activeviam.fwk.ActiveViamRuntimeException;
 import com.av.csv.CSVFormat;
 import com.av.csv.CSVSplitter;
-import com.quartetfs.fwk.QuartetRuntimeException;
 import com.quartetfs.fwk.Registry;
 import com.quartetfs.fwk.format.IParser;
 import com.quartetfs.fwk.impl.Pair;
@@ -154,7 +153,7 @@ public class CSVDiscovery {
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, charset))) {
 			List<String> lines = reader.lines().limit(1000L).collect(Collectors.toList());
 			if(lines.size() <= 0) {
-				throw new QuartetRuntimeException("Cannot process empty file: " + fileName);
+				throw new ActiveViamRuntimeException("Cannot process empty file: " + fileName);
 			}
 			
 			String separator = detectSeparator(lines);
@@ -312,6 +311,5 @@ public class CSVDiscovery {
 		
 		return is;
 	}
-
 
 }

@@ -16,9 +16,9 @@
 	</licenses>
 
 	<properties>
-		<activepivot.version>5.9.0-RC2</activepivot.version>
-		<activeui.version>4.3.6</activeui.version>
-		<spring.boot.version>2.2.6.RELEASE</spring.boot.version>
+		<activepivot.version>5.9.0</activepivot.version>
+		<activeui.version>4.3.7</activeui.version>
+		<spring.boot.version>2.2.7.RELEASE</spring.boot.version>
 	</properties>
 
 	<dependencies>
