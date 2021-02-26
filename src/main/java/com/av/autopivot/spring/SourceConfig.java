@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import com.activeviam.fwk.ActiveViamRuntimeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,7 +52,7 @@ import com.qfs.platform.IPlatform;
 import com.qfs.server.cfg.impl.DatastoreConfig;
 import com.qfs.source.impl.CSVMessageChannelFactory;
 import com.qfs.source.impl.Fetch;
-import com.quartetfs.fwk.QuartetRuntimeException;
+
 
 /**
  *
@@ -122,7 +123,7 @@ public class SourceConfig {
 			CSVFormat discovery = new CSVDiscovery().discoverFile(fileName, charset());
 			return discovery;
 		} catch(Exception e) {
-			throw new QuartetRuntimeException("Could not discover csv file: " + fileName , e);
+			throw new ActiveViamRuntimeException("Could not discover csv file: " + fileName , e);
 		}
 	}
 

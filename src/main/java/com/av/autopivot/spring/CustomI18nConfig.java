@@ -18,6 +18,7 @@
  */
 package com.av.autopivot.spring;
 
+import com.activeviam.fwk.ActiveViamRuntimeException;
 import com.qfs.content.service.IContentEntry;
 import com.qfs.content.service.IContentService;
 import com.qfs.content.service.impl.PrefixedContentService;
@@ -26,7 +27,6 @@ import com.qfs.pivot.builder.discovery.impl.CubeFormatterFactory;
 import com.qfs.pivot.content.IActivePivotContentService;
 import com.qfs.server.cfg.content.IActivePivotContentServiceConfig;
 import com.quartetfs.biz.pivot.cube.formatter.ICubeFormatterFactory;
-import com.quartetfs.fwk.QuartetRuntimeException;
 import com.quartetfs.fwk.Registry;
 import com.quartetfs.fwk.types.IPlugin;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,7 +140,7 @@ public class CustomI18nConfig {
         try {
             push(new PrefixedContentService(I18N_FOLDER, rootContentService), I18N_RESOURCE_FOLDER);
         } catch (Exception e) {
-            throw new QuartetRuntimeException(e);
+            throw new ActiveViamRuntimeException(e);
         }
     }
 

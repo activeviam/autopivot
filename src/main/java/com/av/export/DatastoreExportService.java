@@ -22,7 +22,7 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -137,7 +137,7 @@ public class DatastoreExportService {
 	}
 	
 	@JmxAttribute(desc = "Stores available for export")
-	public List<String> getStoreNames() {
+	public Collection<String> getStoreNames() {
 		return datastore.getTransactionManager().getMetadata().getStoreNames();
 	}
 	

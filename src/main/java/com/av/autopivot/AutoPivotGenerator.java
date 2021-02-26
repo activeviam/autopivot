@@ -28,13 +28,14 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import com.qfs.chunk.impl.Chunks;
+import com.qfs.desc.*;
+import com.qfs.pivot.cube.provider.multi.IMultipleAggregateProvider;
+import com.quartetfs.biz.pivot.postprocessing.IPostProcessorConstants;
 import org.springframework.core.env.Environment;
 
 import com.av.csv.CSVFormat;
-import com.qfs.desc.IFieldDescription;
-import com.qfs.desc.IOptimizationDescription;
 import com.qfs.desc.IOptimizationDescription.Optimization;
-import com.qfs.desc.IStoreDescription;
 import com.qfs.desc.impl.FieldDescription;
 import com.qfs.desc.impl.OptimizationDescription;
 import com.qfs.desc.impl.StoreDescription;
@@ -117,7 +118,6 @@ public class AutoPivotGenerator {
 	public IStoreDescription createStoreDescription(CSVFormat format, Environment env) {
 
 		List<IFieldDescription> fields = new ArrayList<>();
-		List<IOptimizationDescription> optimizations = new ArrayList<>();
 
 		for(int c = 0; c < format.getColumnCount(); c++) {
 			String columnName = format.getColumnName(c);
@@ -127,23 +127,12 @@ public class AutoPivotGenerator {
 			// For date fields automatically add YEAR - MONTH - DAY fields
 			if(isDate(columnType)) {
 				FieldDescription year = new FieldDescription(columnName + ".YEAR", "int");
-				optimizations.add(new OptimizationDescription(year.getName(), Optimization.DICTIONARY));
 				FieldDescription month = new FieldDescription(columnName + ".MONTH", "int");
-				optimizations.add(new OptimizationDescription(month.getName(), Optimization.DICTIONARY));
 				FieldDescription day = new FieldDescription(columnName + ".DAY", "int");
-				optimizations.add(new OptimizationDescription(day.getName(), Optimization.DICTIONARY));
-				
+
 				fields.add(year);
 				fields.add(month);
 				fields.add(day);
-			}
-
-			// Dictionarize objects and integers so they can be used
-			// as ActivePivot levels.
-			if(isDate(columnType)
-					|| "int".equalsIgnoreCase(columnType)
-					|| "String".equalsIgnoreCase(columnType)) {
-				optimizations.add(new OptimizationDescription(columnName, Optimization.DICTIONARY));
 			}
 
 			fields.add(desc);
@@ -151,16 +140,22 @@ public class AutoPivotGenerator {
 
 		// Partitioning
 		IPartitioningDescription partitioning = createPartitioningDescription(format, env);
-		
-		@SuppressWarnings("unchecked")
-		StoreDescription desc = new StoreDescription(
-				BASE_STORE,
-				Collections.EMPTY_LIST,
-				fields,
-				"COLUMN",
-				partitioning,
-				optimizations,
-				false);
+
+
+			@SuppressWarnings("unchecked")
+		StoreDescription desc = new StoreDescription(BASE_STORE,
+					Collections.EMPTY_LIST,
+					fields,
+					"COLUMN",
+					partitioning,
+					Collections.emptyList(),
+					false,
+					Chunks.DEFAULT_CHUNK_SIZE,
+					(IDuplicateKeyHandler)null,
+					(IStoreDescriptionBuilder.IRemoveUnknownKeyListener)null,
+					(Properties)null,
+					(INumaSelectorDescription)null,
+					false);
 
 		return desc;
 	}
@@ -233,7 +228,7 @@ public class AutoPivotGenerator {
 		ActivePivotDescription desc = new ActivePivotDescription();
 		
 		
-		IAggregateProviderDefinition apd = new AggregateProviderDefinition("JUST_IN_TIME");
+		IAggregateProviderDefinition apd = new AggregateProviderDefinition(IMultipleAggregateProvider.DEFAULT_UNDERLYINGPROVIDER_PLUGINKEY);
 		desc.setAggregateProvider(apd);
 		
 		// Hierarchies and dimensions
@@ -359,9 +354,9 @@ public class AutoPivotGenerator {
 
 			if(!numericsOnly.contains(fieldType)) {
 				
-				PostProcessorDescription dc = new PostProcessorDescription(fieldName + ".COUNT", "LEAF_COUNT", new Properties());
+				PostProcessorDescription dc = new PostProcessorDescription(fieldName + ".COUNT", IPostProcessorConstants.LEAF_COUNT_PLUGIN_KEY, new Properties());
 				String leafExpression = fieldName + "@" + fieldName;
-				dc.getProperties().setProperty("leafLevels", leafExpression);
+				dc.getProperties().setProperty(IPostProcessorConstants.LEAF_COUNT_PARAM_LEAF_LEVELS, leafExpression);
 				dc.setFolder("Distinct Count");
 				postProcessors.add(dc);
 			}
