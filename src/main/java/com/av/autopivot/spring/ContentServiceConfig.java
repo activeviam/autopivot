@@ -18,10 +18,14 @@
  */
 package com.av.autopivot.spring;
 
+import com.activeviam.fwk.ActiveViamRuntimeException;
 import com.qfs.content.service.impl.InMemoryContentService;
+import com.qfs.content.snapshot.impl.ContentServiceSnapshotter;
+import com.qfs.util.impl.QfsFiles;
 import com.quartetfs.biz.pivot.context.IContextValue;
 import com.quartetfs.biz.pivot.definitions.ICalculatedMemberDescription;
 import com.quartetfs.biz.pivot.definitions.IKpiDescription;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -30,6 +34,8 @@ import com.qfs.content.service.IContentService;
 import com.qfs.pivot.content.IActivePivotContentService;
 import com.qfs.pivot.content.impl.ActivePivotContentServiceBuilder;
 import com.qfs.server.cfg.content.IActivePivotContentServiceConfig;
+
+import org.slf4j.Logger;
 
 /**
  * Spring configuration of the <b>Content Service</b> backed by a local <b>Content Server</b>.
@@ -41,6 +47,7 @@ import com.qfs.server.cfg.content.IActivePivotContentServiceConfig;
 @Configuration
 public class ContentServiceConfig implements IActivePivotContentServiceConfig {
 
+	private static final Logger logger = LoggerFactory.getLogger(ContentServiceConfig.class);
 	/** Role needed to create calculated members */
 	private static final String CALCULATED_MEMBER_ROLE = SecurityConfig.ROLE_USER;
 
@@ -76,6 +83,29 @@ public class ContentServiceConfig implements IActivePivotContentServiceConfig {
 	@Bean
 	public IContentService contentService() {
 		return new InMemoryContentService();
+	}
+
+
+	private static final String UI_FOLDER = "/ui";
+	private static final String CS_INIT_FILE = "contentserver-init.json";
+
+	@Bean
+	public void initActiveUIFolder() {
+		final var service = contentService().withRootPrivileges();
+
+		if (service.get(UI_FOLDER) == null) {
+
+			try {
+				new ContentServiceSnapshotter(service).importSubtree(
+						UI_FOLDER, QfsFiles.getResourceAsStream(CS_INIT_FILE));
+				logger.info("Initializing the contentServer with the file: [{}].", CS_INIT_FILE);
+			} catch (final Exception e) {
+				logger.error("Failed to initialize the /ui folder in the contentServer with the file: [{}].", CS_INIT_FILE, e);
+
+				throw new ActiveViamRuntimeException(
+						"Failed to initialize the /ui folder in the contentServer.", e);
+			}
+		}
 	}
 
 }
