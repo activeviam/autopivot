@@ -16,7 +16,7 @@
 	</licenses>
 
 	<properties>
-		<activepivot.version>5.10.10</activepivot.version>
+		<activepivot.version>5.11.3</activepivot.version>
 		<activeui.version>5.0.16</activeui.version>
 		<spring.boot.version>2.5.12</spring.boot.version>
 	</properties>

@@ -43,7 +43,6 @@ import com.qfs.platform.IPlatform;
 import com.qfs.store.part.IPartitioningDescription;
 import com.qfs.store.part.impl.ModuloFunctionDescription;
 import com.qfs.store.part.impl.PartitioningDescriptionBuilder;
-import com.qfs.store.selection.ISelectionField;
 import com.qfs.store.selection.impl.SelectionField;
 import com.qfs.util.impl.QfsArrays;
 import com.quartetfs.biz.pivot.cube.dimension.IDimension.DimensionType;
@@ -141,12 +140,10 @@ public class AutoPivotGenerator {
 		// Partitioning
 		IPartitioningDescription partitioning = createPartitioningDescription(format, env);
 
-
 			@SuppressWarnings("unchecked")
 		StoreDescription desc = new StoreDescription(BASE_STORE,
 					Collections.EMPTY_LIST,
 					fields,
-					"COLUMN",
 					partitioning,
 					Collections.emptyList(),
 					false,
@@ -402,7 +399,7 @@ public class AutoPivotGenerator {
 		ActivePivotSchemaDescription desc = new ActivePivotSchemaDescription();
 
 		// Datastore selection
-		List<ISelectionField> fields = new ArrayList<>();
+		List<SelectionField> fields = new ArrayList<>();
 		for(int f = 0; f < format.getColumnCount(); f++) {
 			String fieldName = format.getColumnName(f);
 			String fieldType = format.getColumnType(f);
