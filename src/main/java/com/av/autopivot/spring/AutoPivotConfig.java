@@ -25,7 +25,7 @@ import com.qfs.server.cfg.IActivePivotConfig;
 import com.qfs.server.cfg.IDatastoreConfig;
 import com.qfs.server.cfg.content.IActivePivotContentServiceConfig;
 import com.qfs.server.cfg.impl.*;
-import com.qfs.service.store.impl.NoSecurityDatastoreServiceConfig;
+import com.qfs.service.store.impl.NoSecurityDatabaseServiceConfig;
 import com.quartetfs.fwk.Registry;
 import com.quartetfs.fwk.contributions.impl.ClasspathContributionProvider;
 import com.quartetfs.fwk.monitoring.jmx.impl.JMXEnabler;
@@ -66,9 +66,9 @@ import java.util.logging.Logger;
 @Configuration
 @Import(
 value = {
-		ActivePivotConfig.class,
-		DatastoreConfig.class,
-		NoSecurityDatastoreServiceConfig.class,
+		// Core imports
+		ActivePivotWithDatastoreConfig.class,
+
 		FullAccessBranchPermissionsManagerConfig.class,
 		JwtConfig.class,
 	
@@ -87,6 +87,7 @@ value = {
 		StreamingMonitorConfig.class,
 
 		ActivePivotManagerDescriptionConfig.class,
+		NoSecurityDatabaseServiceConfig.class,
 		ContentServiceConfig.class,
 		SourceConfig.class,
 		SecurityConfig.class,
@@ -110,7 +111,7 @@ public class AutoPivotConfig {
 	@Autowired
 	protected Environment env;
 
-	/** Datastore spring configuration */
+	/** Datastore spring configuration. */
 	@Autowired
 	protected IDatastoreConfig datastoreConfig;
 
@@ -155,7 +156,7 @@ public class AutoPivotConfig {
 	 */
 	@Bean
 	public JMXEnabler JMXDatastoreEnabler() {
-		return new JMXEnabler(datastoreConfig.datastore());
+		return new JMXEnabler(datastoreConfig.database());
 	}
 
 	/**
@@ -190,7 +191,7 @@ public class AutoPivotConfig {
 	 */
 	@Bean
 	public JMXEnabler JMXDatastoreExportService() {
-		return new JMXEnabler(new DatastoreExportService(datastoreConfig.datastore()));
+		return new JMXEnabler(new DatastoreExportService(datastoreConfig.database()));
 	}
 
 	/**

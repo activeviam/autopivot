@@ -31,6 +31,8 @@ import java.util.logging.Logger;
 import com.qfs.chunk.impl.Chunks;
 import com.qfs.desc.*;
 import com.qfs.pivot.cube.provider.multi.IMultipleAggregateProvider;
+import com.qfs.store.part.INumaSelectorDescription;
+import com.quartetfs.biz.pivot.definitions.*;
 import com.quartetfs.biz.pivot.postprocessing.IPostProcessorConstants;
 import org.springframework.core.env.Environment;
 
@@ -48,19 +50,6 @@ import com.qfs.util.impl.QfsArrays;
 import com.quartetfs.biz.pivot.cube.dimension.IDimension.DimensionType;
 import com.quartetfs.biz.pivot.cube.hierarchy.ILevelInfo.LevelType;
 import com.quartetfs.biz.pivot.cube.hierarchy.measures.IMeasureHierarchy;
-import com.quartetfs.biz.pivot.definitions.IActivePivotDescription;
-import com.quartetfs.biz.pivot.definitions.IActivePivotInstanceDescription;
-import com.quartetfs.biz.pivot.definitions.IActivePivotManagerDescription;
-import com.quartetfs.biz.pivot.definitions.IActivePivotSchemaDescription;
-import com.quartetfs.biz.pivot.definitions.IActivePivotSchemaInstanceDescription;
-import com.quartetfs.biz.pivot.definitions.IAggregateProviderDefinition;
-import com.quartetfs.biz.pivot.definitions.IAggregatedMeasureDescription;
-import com.quartetfs.biz.pivot.definitions.IAggregatesCacheDescription;
-import com.quartetfs.biz.pivot.definitions.IAxisHierarchyDescription;
-import com.quartetfs.biz.pivot.definitions.IAxisLevelDescription;
-import com.quartetfs.biz.pivot.definitions.ICatalogDescription;
-import com.quartetfs.biz.pivot.definitions.INativeMeasureDescription;
-import com.quartetfs.biz.pivot.definitions.IPostProcessorDescription;
 import com.quartetfs.biz.pivot.definitions.impl.ActivePivotDescription;
 import com.quartetfs.biz.pivot.definitions.impl.ActivePivotInstanceDescription;
 import com.quartetfs.biz.pivot.definitions.impl.ActivePivotManagerDescription;
@@ -253,7 +242,7 @@ public class AutoPivotGenerator {
 				if(isDate(fieldType)) {
 					dimension.setDimensionType(DimensionType.TIME);
 					
-					List<IAxisHierarchyDescription> hierarchies = new ArrayList<>();
+					List<IHierarchyDescription> hierarchies = new ArrayList<>();
 					IAxisHierarchyDescription hierarchy = new AxisHierarchyDescription(fieldName);
 					hierarchy.setDefaultHierarchy(true);
 					IAxisLevelDescription dateLevel = new AxisLevelDescription(fieldName);
@@ -403,12 +392,12 @@ public class AutoPivotGenerator {
 		for(int f = 0; f < format.getColumnCount(); f++) {
 			String fieldName = format.getColumnName(f);
 			String fieldType = format.getColumnType(f);
-			fields.add(new SelectionField(fieldName));
+			fields.add(new SelectionField(fieldName,fieldName));
 			
 			if(isDate(fieldType)) {
-				fields.add(new SelectionField(fieldName + ".YEAR"));
-				fields.add(new SelectionField(fieldName + ".MONTH"));
-				fields.add(new SelectionField(fieldName + ".DAY"));
+				fields.add(new SelectionField(fieldName + ".YEAR",fieldName + ".YEAR"));
+				fields.add(new SelectionField(fieldName + ".MONTH",fieldName + ".MONTH"));
+				fields.add(new SelectionField(fieldName + ".DAY",fieldName + ".DAY"));
 			}
 		}
 		SelectionDescription selection = new SelectionDescription(BASE_STORE, fields);

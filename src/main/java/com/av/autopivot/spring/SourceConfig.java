@@ -28,6 +28,8 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 import com.activeviam.fwk.ActiveViamRuntimeException;
+import com.qfs.msg.csv.impl.CSVSourceConfiguration;
+import com.qfs.server.cfg.IDatastoreConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,7 +51,6 @@ import com.qfs.msg.csv.filesystem.impl.SingleFileCSVTopic;
 import com.qfs.msg.csv.impl.CSVParserConfiguration;
 import com.qfs.msg.csv.impl.CSVSource;
 import com.qfs.platform.IPlatform;
-import com.qfs.server.cfg.impl.DatastoreConfig;
 import com.qfs.source.impl.CSVMessageChannelFactory;
 import com.qfs.source.impl.Fetch;
 
@@ -77,9 +78,9 @@ public class SourceConfig {
 	@Autowired
 	protected Environment env;
 
-	/** Application datastore, automatically wired */
+	/** Application datastore, automatically wired. */
 	@Autowired
-	protected DatastoreConfig datastoreConfig;
+	protected IDatastoreConfig datastoreConfig;
 
 	/** Create and configure the CSV engine */
 	@Bean
@@ -90,10 +91,15 @@ public class SourceConfig {
 		LOGGER.info("Allocating " + parserThreads + " parser threads.");
 		
 		CSVSource<Path> source = new CSVSource<Path>();
-		Properties properties = new Properties();
-		properties.put(ICSVSourceConfiguration.BUFFER_SIZE_PROPERTY, "256");
-		properties.put(ICSVSourceConfiguration.PARSER_THREAD_PROPERTY, parserThreads.toString());
-		source.configure(properties);
+		CSVSourceConfiguration.CSVSourceConfigurationBuilder<Path> sourceConfigurationBuilder = new CSVSourceConfiguration.CSVSourceConfigurationBuilder<>();
+		if (null != parserThreads) {
+			sourceConfigurationBuilder.parserThreads(parserThreads);
+		}
+		final String bufferSize = env.getProperty("csvSource.bufferSize","256");
+		if (null != bufferSize) {
+			sourceConfigurationBuilder.bufferSize(Integer.parseInt(bufferSize));
+		}
+		source.configure(sourceConfigurationBuilder.build());
 		
 		return source;
 	}
@@ -152,7 +158,7 @@ public class SourceConfig {
 		SingleFileCSVTopic topic = new SingleFileCSVTopic(AutoPivotGenerator.BASE_STORE, configuration, fileName, 1000);
 		source.addTopic(topic);
 		
-		CSVMessageChannelFactory<Path> channelFactory = new CSVMessageChannelFactory<>(source, datastoreConfig.datastore());
+		CSVMessageChannelFactory<Path> channelFactory = new CSVMessageChannelFactory<>(source, datastoreConfig.database());
 		
 		// Derive calculated columns
 		List<IColumnCalculator<ILineReader>> calculatedColumns = new ArrayList<IColumnCalculator<ILineReader>>();

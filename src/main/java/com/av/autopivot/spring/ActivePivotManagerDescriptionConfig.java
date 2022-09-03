@@ -21,6 +21,7 @@ package com.av.autopivot.spring;
 import com.qfs.desc.IDatastoreSchemaDescription;
 import com.qfs.desc.IStoreDescription;
 import com.qfs.desc.impl.DatastoreSchemaDescription;
+import com.qfs.server.cfg.IDatastoreSchemaDescriptionConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,7 +47,7 @@ import java.util.LinkedList;
  *
  */
 @Configuration
-public class ActivePivotManagerDescriptionConfig implements IActivePivotManagerDescriptionConfig {
+public class ActivePivotManagerDescriptionConfig implements IActivePivotManagerDescriptionConfig, IDatastoreSchemaDescriptionConfig {
 
 	/** Spring environment */
 	@Autowired
@@ -58,7 +59,7 @@ public class ActivePivotManagerDescriptionConfig implements IActivePivotManagerD
 
 	@Bean
 	@Override
-	public IActivePivotManagerDescription userManagerDescription() {
+	public IActivePivotManagerDescription managerDescription() {
 		CSVFormat discovery = sourceConfig.discoverFile();
 
 		AutoPivotGenerator generator = generator();
@@ -79,9 +80,8 @@ public class ActivePivotManagerDescriptionConfig implements IActivePivotManagerD
 		return new AutoPivotGenerator();
 	}
 
-	@Bean
 	@Override
-	public IDatastoreSchemaDescription userSchemaDescription() {
+	public IDatastoreSchemaDescription datastoreSchemaDescription() {
 		CSVFormat discovery = sourceConfig.discoverFile();
 		AutoPivotGenerator generator = generator();
 
@@ -89,5 +89,4 @@ public class ActivePivotManagerDescriptionConfig implements IActivePivotManagerD
 		stores.add(generator.createStoreDescription(discovery, env));
 		return new DatastoreSchemaDescription(stores, Collections.emptyList());
 	}
-
 }
