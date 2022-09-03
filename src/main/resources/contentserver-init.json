@@ -1,0 +1,123 @@
+{
+  "entry": {
+    "isDirectory": true,
+    "owners": ["ROLE_CS_ROOT"],
+    "readers": ["ROLE_CS_ROOT"]
+  },
+  "children": {
+    "calculated_measures": {
+      "entry": {
+        "isDirectory": true,
+        "owners": ["ROLE_CS_ROOT"],
+        "readers": ["ROLE_CS_ROOT"]
+      },
+      "children": {
+        "content": {
+          "entry": {
+            "isDirectory": true,
+            "owners": ["ROLE_USER"],
+            "readers": ["ROLE_USER"]
+          }
+        },
+        "structure": {
+          "entry": {
+            "isDirectory": true,
+            "owners": ["ROLE_USER"],
+            "readers": ["ROLE_USER"]
+          }
+        }
+      }
+    },
+    "filters": {
+      "entry": {
+        "isDirectory": true,
+        "owners": ["ROLE_CS_ROOT"],
+        "readers": ["ROLE_CS_ROOT"]
+      },
+      "children": {
+        "content": {
+          "entry": {
+            "isDirectory": true,
+            "owners": ["ROLE_USER"],
+            "readers": ["ROLE_USER"]
+          }
+        },
+        "structure": {
+          "entry": {
+            "isDirectory": true,
+            "owners": ["ROLE_USER"],
+            "readers": ["ROLE_USER"]
+          }
+        }
+      }
+    },
+    "widgets": {
+      "entry": {
+        "isDirectory": true,
+        "owners": ["ROLE_CS_ROOT"],
+        "readers": ["ROLE_CS_ROOT"]
+      },
+      "children": {
+        "content": {
+          "entry": {
+            "isDirectory": true,
+            "owners": ["ROLE_USER"],
+            "readers": ["ROLE_USER"]
+          }
+        },
+        "structure": {
+          "entry": {
+            "isDirectory": true,
+            "owners": ["ROLE_USER"],
+            "readers": ["ROLE_USER"]
+          }
+        }
+      }
+    },
+    "dashboards": {
+      "entry": {
+        "isDirectory": true,
+        "owners": ["ROLE_CS_ROOT"],
+        "readers": ["ROLE_CS_ROOT"]
+      },
+      "children": {
+        "content": {
+          "entry": {
+            "isDirectory": true,
+            "owners": ["ROLE_USER"],
+            "readers": ["ROLE_USER"]
+          }
+        },
+        "structure": {
+          "entry": {
+            "isDirectory": true,
+            "owners": ["ROLE_USER"],
+            "readers": ["ROLE_USER"]
+          }
+        },
+        "thumbnails": {
+          "entry": {
+            "isDirectory": true,
+            "owners": ["ROLE_USER"],
+            "readers": ["ROLE_USER"]
+          }
+        }
+      }
+    },
+    "users": {
+      "entry": {
+        "isDirectory": true,
+        "owners": ["ROLE_USER"],
+        "readers": ["ROLE_USER"]
+      }
+    },
+    "organization_settings": {
+      "entry": {
+        "isDirectory": false,
+        "owners": ["ROLE_CS_ROOT"],
+        "readers": ["ROLE_USER"],
+        "content": "{}"
+      }
+    }
+  }
+}

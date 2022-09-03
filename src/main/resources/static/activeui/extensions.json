@@ -1,0 +1,4 @@
+{
+  "@activeviam/starter": "extensions/@activeviam/starter/@activeviam/starter.js",
+  "@activeviam/advanced-extension": "extensions\\@activeviam\\advanced-extension\\@activeviam\\advanced-extension.js"
+}

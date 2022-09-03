@@ -286,7 +286,7 @@ public class AutoPivotGenerator {
 		List<IPostProcessorDescription> postProcessors = new ArrayList<>();
 		
 		for(int f = 0; f < format.getColumnCount(); f++) {
-			String fieldName = format.getColumnName(f);
+			String fieldName = format.getColumnName(f).trim();
 			String fieldType = format.getColumnType(f);
 			if(numerics.contains(fieldType) && !fieldName.endsWith("id") && !fieldName.endsWith("ID")) {
 				
@@ -349,7 +349,7 @@ public class AutoPivotGenerator {
 
 		// Add distinct count calculation for each level field
 		for(int f = 0; f < format.getColumnCount(); f++) {
-			String fieldName = format.getColumnName(f);
+			String fieldName = format.getColumnName(f).trim();
 			String fieldType = format.getColumnType(f);
 
 			if(!numericsOnly.contains(fieldType)) {

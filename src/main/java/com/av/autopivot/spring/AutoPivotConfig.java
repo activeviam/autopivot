@@ -93,7 +93,8 @@ value = {
 
 		// ActiveUI resource server configuration
 		ActiveUIResourceServerConfig.class,
-		CustomI18nConfig.class
+		CustomI18nConfig.class,
+		ActivePivotWebMvcConfigurer.class
 })
 public class AutoPivotConfig {
 
