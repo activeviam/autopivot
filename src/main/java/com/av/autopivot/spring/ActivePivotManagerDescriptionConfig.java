@@ -18,19 +18,17 @@
  */
 package com.av.autopivot.spring;
 
+import com.av.autopivot.AutoPivotGenerator;
 import com.qfs.desc.IDatastoreSchemaDescription;
 import com.qfs.desc.IStoreDescription;
 import com.qfs.desc.impl.DatastoreSchemaDescription;
+import com.qfs.server.cfg.IActivePivotManagerDescriptionConfig;
 import com.qfs.server.cfg.IDatastoreSchemaDescriptionConfig;
+import com.quartetfs.biz.pivot.definitions.IActivePivotManagerDescription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-
-import com.av.autopivot.AutoPivotGenerator;
-import com.av.csv.CSVFormat;
-import com.qfs.server.cfg.IActivePivotManagerDescriptionConfig;
-import com.quartetfs.biz.pivot.definitions.IActivePivotManagerDescription;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -53,20 +51,14 @@ public class ActivePivotManagerDescriptionConfig implements IActivePivotManagerD
 	@Autowired
 	protected Environment env;
 
-	/** Datasource configuration */
+
 	@Autowired
-	protected SourceConfig sourceConfig;
+	protected DiscoveryConf discoveryConf;
 
 	@Bean
 	@Override
 	public IActivePivotManagerDescription managerDescription() {
-		CSVFormat discovery = sourceConfig.discoverFile();
-
-		AutoPivotGenerator generator = generator();
-		IActivePivotManagerDescription manager =
-				generator.createActivePivotManagerDescription(discovery, env);
-
-		return manager;
+		return generator().createActivePivotManagerDescription(discoveryConf.discoverFile(), env);
 	}
 
 	/**
@@ -82,11 +74,8 @@ public class ActivePivotManagerDescriptionConfig implements IActivePivotManagerD
 
 	@Override
 	public IDatastoreSchemaDescription datastoreSchemaDescription() {
-		CSVFormat discovery = sourceConfig.discoverFile();
-		AutoPivotGenerator generator = generator();
-
 		final Collection<IStoreDescription> stores = new LinkedList<>();
-		stores.add(generator.createStoreDescription(discovery, env));
+		stores.add(generator().createStoreDescription(discoveryConf.discoverFile(), env));
 		return new DatastoreSchemaDescription(stores, Collections.emptyList());
 	}
 }

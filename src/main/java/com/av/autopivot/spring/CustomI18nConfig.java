@@ -154,7 +154,6 @@ public class CustomI18nConfig {
      */
     protected static void push(PrefixedContentService contentService, String languageFolder)
             throws ServiceException, IOException {
-        //File root = QfsFiles.getDirectory(languageFolder).toFile();
 
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         LOGGER.info("Scanning for languages in: " + languageFolder);

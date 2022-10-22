@@ -86,13 +86,13 @@ public class DatastoreExportService {
 				// Export query
 				final ICursor queryCursor;
 				if(full) {
-					queryCursor = datastore.getHead().getQueryManager()
+					queryCursor = datastore.getMostRecentVersion().getDatastoreQueryRunner()
 							.forStore(storeName)
 							.withoutCondition()
 							.selectingAllReachableFields()
 							.run();
 				} else {
-					queryCursor = datastore.getHead().getQueryManager()
+					queryCursor = datastore.getMostRecentVersion().getDatastoreQueryRunner()
 							.forStore(storeName)
 							.withoutCondition()
 							.selectingAllStoreFields()

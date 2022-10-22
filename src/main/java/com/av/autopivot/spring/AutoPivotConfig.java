@@ -90,7 +90,9 @@ value = {
 		NoSecurityDatabaseServiceConfig.class,
 		ContentServiceConfig.class,
 		SourceConfig.class,
+		DiscoveryConf.class,
 		SecurityConfig.class,
+		UserDetailsServiceConfig.class,
 
 		// ActiveUI resource server configuration
 		ActiveUIResourceServerConfig.class,
@@ -119,9 +121,6 @@ public class AutoPivotConfig {
 	@Autowired
 	protected IActivePivotConfig apConfig;
 
-	/** ActivePivot content service spring configuration */
-	@Autowired
-	protected IActivePivotContentServiceConfig apCSConfig;
 
 	/**
 	 *
@@ -176,7 +175,7 @@ public class AutoPivotConfig {
 	 * @return the {@link JMXEnabler} attached to the content service.
 	 */
 	@Bean
-	public JMXEnabler JMXActivePivotContentServiceEnabler() {
+	public JMXEnabler JMXActivePivotContentServiceEnabler(IActivePivotContentServiceConfig apCSConfig) {
 		// to allow operations from the JMX bean
 		return new JMXEnabler(
 				new DynamicActivePivotContentServiceMBean(

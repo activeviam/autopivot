@@ -19,23 +19,21 @@
 package com.av.autopivot.spring;
 
 import com.activeviam.fwk.ActiveViamRuntimeException;
+import com.qfs.content.cfg.impl.ContentServerRestServicesConfig;
+import com.qfs.content.service.IContentService;
 import com.qfs.content.service.impl.InMemoryContentService;
 import com.qfs.content.snapshot.impl.ContentServiceSnapshotter;
+import com.qfs.pivot.content.IActivePivotContentService;
+import com.qfs.pivot.content.impl.ActivePivotContentServiceBuilder;
+import com.qfs.server.cfg.content.IActivePivotContentServiceConfig;
 import com.qfs.util.impl.QfsFiles;
 import com.quartetfs.biz.pivot.context.IContextValue;
 import com.quartetfs.biz.pivot.definitions.ICalculatedMemberDescription;
 import com.quartetfs.biz.pivot.definitions.IKpiDescription;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import com.qfs.content.cfg.impl.ContentServerRestServicesConfig;
-import com.qfs.content.service.IContentService;
-import com.qfs.pivot.content.IActivePivotContentService;
-import com.qfs.pivot.content.impl.ActivePivotContentServiceBuilder;
-import com.qfs.server.cfg.content.IActivePivotContentServiceConfig;
-
-import org.slf4j.Logger;
 
 /**
  * Spring configuration of the <b>Content Service</b> backed by a local <b>Content Server</b>.
@@ -100,10 +98,8 @@ public class ContentServiceConfig implements IActivePivotContentServiceConfig {
 						UI_FOLDER, QfsFiles.getResourceAsStream(CS_INIT_FILE));
 				logger.info("Initializing the contentServer with the file: [{}].", CS_INIT_FILE);
 			} catch (final Exception e) {
-				logger.error("Failed to initialize the /ui folder in the contentServer with the file: [{}].", CS_INIT_FILE, e);
-
 				throw new ActiveViamRuntimeException(
-						"Failed to initialize the /ui folder in the contentServer.", e);
+						"Failed to initialize the /ui folder in the contentServer with file"+CS_INIT_FILE, e);
 			}
 		}
 	}

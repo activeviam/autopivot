@@ -28,6 +28,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import com.activeviam.database.api.query.AliasedField;
 import com.qfs.chunk.impl.Chunks;
 import com.qfs.desc.*;
 import com.qfs.pivot.cube.provider.multi.IMultipleAggregateProvider;
@@ -45,7 +46,6 @@ import com.qfs.platform.IPlatform;
 import com.qfs.store.part.IPartitioningDescription;
 import com.qfs.store.part.impl.ModuloFunctionDescription;
 import com.qfs.store.part.impl.PartitioningDescriptionBuilder;
-import com.qfs.store.selection.impl.SelectionField;
 import com.qfs.util.impl.QfsArrays;
 import com.quartetfs.biz.pivot.cube.dimension.IDimension.DimensionType;
 import com.quartetfs.biz.pivot.cube.hierarchy.ILevelInfo.LevelType;
@@ -78,6 +78,13 @@ import com.quartetfs.biz.pivot.definitions.impl.SelectionDescription;
  */
 public class AutoPivotGenerator {
 
+	public static final String YEAR = ".YEAR";
+	public static final String MONTH = ".MONTH";
+	public static final String DAY = ".DAY";
+	public static final String FLOAT = "float";
+	public static final String DOUBLE = "double";
+	public static final String LONG = "long";
+	public static final String INT = "int";
 	/** Logger **/
 	protected static Logger LOGGER = Logger.getLogger(AutoPivotGenerator.class.getName());
 	
@@ -114,9 +121,9 @@ public class AutoPivotGenerator {
 
 			// For date fields automatically add YEAR - MONTH - DAY fields
 			if(isDate(columnType)) {
-				FieldDescription year = new FieldDescription(columnName + ".YEAR", "int");
-				FieldDescription month = new FieldDescription(columnName + ".MONTH", "int");
-				FieldDescription day = new FieldDescription(columnName + ".DAY", "int");
+				FieldDescription year = new FieldDescription(columnName + YEAR, INT);
+				FieldDescription month = new FieldDescription(columnName + MONTH, INT);
+				FieldDescription day = new FieldDescription(columnName + DAY, INT);
 
 				fields.add(year);
 				fields.add(month);
@@ -145,8 +152,8 @@ public class AutoPivotGenerator {
 
 		return desc;
 	}
-	
-	
+
+
 	/**
 	 * 
 	 * Automatically configure the partitioning of the datastore.
@@ -175,7 +182,7 @@ public class AutoPivotGenerator {
 					}
 				}
 				
-				LOGGER.warning("Configured partitioning field '" + partitioningField + "' does not exist in input file format. Default partitioning will be used.");
+				LOGGER.warning(()->"Configured partitioning field '" + partitioningField + "' does not exist in input file format. Default partitioning will be used.");
 				
 			}
 			
@@ -186,8 +193,8 @@ public class AutoPivotGenerator {
 				String fieldName = format.getColumnName(c);
 				String fieldType = format.getColumnType(c);
 					
-				if(!"float".equalsIgnoreCase(fieldType) && !"double".equalsIgnoreCase(fieldType) && !"long".equalsIgnoreCase(fieldType)) {
-					LOGGER.info("Applying default partitioning policy: " + partitionCount + " partitions with partitioning field '" + fieldName + "'");
+				if(!FLOAT.equalsIgnoreCase(fieldType) && !DOUBLE.equalsIgnoreCase(fieldType) && !LONG.equalsIgnoreCase(fieldType)) {
+					LOGGER.info(()->"Applying default partitioning policy: " + partitionCount + " partitions with partitioning field '" + fieldName + "'");
 					return new PartitioningDescriptionBuilder()
 					.addSubPartitioning(fieldName, new ModuloFunctionDescription(partitionCount))
 					.build();
@@ -220,10 +227,10 @@ public class AutoPivotGenerator {
 		// Hierarchies and dimensions
 		AxisDimensionsDescription dimensions = new AxisDimensionsDescription();
 		
-		Set<String> numerics = QfsArrays.mutableSet("double", "float", "int", "long");
-		Set<String> integers = QfsArrays.mutableSet("int", "long");
-		Set<String> decimals = QfsArrays.mutableSet("double", "float");
-		Set<String> numericsOnly = QfsArrays.mutableSet("double", "float", "long");
+		Set<String> numerics = QfsArrays.mutableSet(DOUBLE, FLOAT, INT, LONG);
+		Set<String> integers = QfsArrays.mutableSet(INT, LONG);
+		Set<String> decimals = QfsArrays.mutableSet(DOUBLE, FLOAT);
+		Set<String> numericsOnly = QfsArrays.mutableSet(DOUBLE, FLOAT, LONG);
 
 		for(int f = 0; f < format.getColumnCount(); f++) {
 			String fieldName = format.getColumnName(f);
@@ -233,7 +240,7 @@ public class AutoPivotGenerator {
 			if(!numericsOnly.contains(fieldType)) {
 				AxisDimensionDescription dimension = new AxisDimensionDescription(fieldName);
 				IAxisHierarchyDescription h = new AxisHierarchyDescription(fieldName);
-				IAxisLevelDescription l = new AxisLevelDescription(fieldName);
+				IAxisLevelDescription l = new AxisLevelDescription(fieldName,fieldName);
 				h.getLevels().add(l);
 				dimension.getHierarchies().add(h);
 				dimensions.addValues(Arrays.asList(dimension));
@@ -245,16 +252,16 @@ public class AutoPivotGenerator {
 					List<IHierarchyDescription> hierarchies = new ArrayList<>();
 					IAxisHierarchyDescription hierarchy = new AxisHierarchyDescription(fieldName);
 					hierarchy.setDefaultHierarchy(true);
-					IAxisLevelDescription dateLevel = new AxisLevelDescription(fieldName);
+					IAxisLevelDescription dateLevel = new AxisLevelDescription(fieldName,fieldName);
 					dateLevel.setLevelType(LevelType.TIME);
 					hierarchy.setLevels(Arrays.asList(dateLevel));
 					hierarchies.add(hierarchy);
 					
 					IAxisHierarchyDescription ymd = new AxisHierarchyDescription(fieldName + "_YMD");
 					List<IAxisLevelDescription> levels = new ArrayList<>();
-					levels.add(new AxisLevelDescription("Year", fieldName + ".YEAR"));
-					levels.add(new AxisLevelDescription("Month", fieldName + ".MONTH"));
-					levels.add(new AxisLevelDescription("Day", fieldName + ".DAY"));
+					levels.add(new AxisLevelDescription("Year", fieldName + YEAR));
+					levels.add(new AxisLevelDescription("Month", fieldName + MONTH));
+					levels.add(new AxisLevelDescription("Day", fieldName + DAY));
 					ymd.setLevels(levels);
 					hierarchies.add(ymd);
 					
@@ -369,7 +376,7 @@ public class AutoPivotGenerator {
 		// Aggregate cache configuration
 		if(env.containsProperty("pivot.cache.size")) {
 			Integer cacheSize = env.getProperty("pivot.cache.size", Integer.class);
-			LOGGER.info("Configuring aggregate cache of size " + cacheSize);
+			LOGGER.info(()->"Configuring aggregate cache of size " + cacheSize);
 			IAggregatesCacheDescription cacheDescription = new AggregatesCacheDescription();
 			cacheDescription.setSize(cacheSize);
 			desc.setAggregatesCacheDescription(cacheDescription);
@@ -388,16 +395,16 @@ public class AutoPivotGenerator {
 		ActivePivotSchemaDescription desc = new ActivePivotSchemaDescription();
 
 		// Datastore selection
-		List<SelectionField> fields = new ArrayList<>();
+		List<AliasedField> fields = new ArrayList<>();
 		for(int f = 0; f < format.getColumnCount(); f++) {
 			String fieldName = format.getColumnName(f);
 			String fieldType = format.getColumnType(f);
-			fields.add(new SelectionField(fieldName,fieldName));
+			fields.add(AliasedField.fromFieldName(fieldName));
 			
 			if(isDate(fieldType)) {
-				fields.add(new SelectionField(fieldName + ".YEAR",fieldName + ".YEAR"));
-				fields.add(new SelectionField(fieldName + ".MONTH",fieldName + ".MONTH"));
-				fields.add(new SelectionField(fieldName + ".DAY",fieldName + ".DAY"));
+				fields.add(AliasedField.fromFieldName(fieldName + YEAR));
+				fields.add(AliasedField.fromFieldName(fieldName + MONTH));
+				fields.add(AliasedField.fromFieldName(fieldName + DAY));
 			}
 		}
 		SelectionDescription selection = new SelectionDescription(BASE_STORE, fields);
@@ -405,8 +412,8 @@ public class AutoPivotGenerator {
 		// ActivePivot instance
 		IActivePivotDescription pivot = createActivePivotDescription(format, env);
 		IActivePivotInstanceDescription instance = new ActivePivotInstanceDescription(PIVOT, pivot);
-		
-		desc.setDatastoreSelection(selection);
+
+		desc.setDatabaseSelection(selection);
 		desc.setActivePivotInstanceDescriptions(Collections.singletonList(instance));
 		
 		return desc;

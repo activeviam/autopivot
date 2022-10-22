@@ -18,19 +18,20 @@
  */
 package com.av.autopivot.spring;
 
-import static com.qfs.QfsWebUtils.url;
-import static com.qfs.server.cfg.impl.ActivePivotRestServicesConfig.PING_SUFFIX;
-import static com.qfs.server.cfg.impl.ActivePivotRestServicesConfig.REST_API_URL_PREFIX;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import javax.servlet.Filter;
-
 import com.activeviam.security.cfg.ICorsConfig;
+import com.qfs.content.cfg.impl.ContentServerRestServicesConfig;
+import com.qfs.content.service.IContentService;
+import com.qfs.jwt.service.IJwtService;
+import com.qfs.server.cfg.IActivePivotConfig;
+import com.qfs.server.cfg.IJwtConfig;
 import com.qfs.server.cfg.impl.JwtRestServiceConfig;
 import com.qfs.server.cfg.impl.VersionServicesConfig;
+import com.qfs.servlet.handlers.impl.NoRedirectLogoutSuccessHandler;
+import com.quartetfs.biz.pivot.security.IAuthorityComparator;
+import com.quartetfs.biz.pivot.security.impl.AuthorityComparatorAdapter;
+import com.quartetfs.biz.pivot.security.impl.UserDetailsServiceWrapper;
+import com.quartetfs.fwk.ordering.impl.CustomComparator;
+import com.quartetfs.fwk.security.IUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -47,32 +48,23 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManagerBuilder;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.switchuser.SwitchUserFilter;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
-
-import com.qfs.content.cfg.impl.ContentServerRestServicesConfig;
-import com.qfs.content.service.IContentService;
-import com.qfs.jwt.service.IJwtService;
-import com.qfs.security.spring.impl.CompositeUserDetailsService;
-import com.qfs.server.cfg.IActivePivotConfig;
-import com.qfs.server.cfg.IJwtConfig;
-import com.qfs.servlet.handlers.impl.NoRedirectLogoutSuccessHandler;
-import com.quartetfs.biz.pivot.security.IAuthorityComparator;
-import com.quartetfs.biz.pivot.security.impl.AuthorityComparatorAdapter;
-import com.quartetfs.biz.pivot.security.impl.UserDetailsServiceWrapper;
-import com.quartetfs.fwk.ordering.impl.CustomComparator;
-import com.quartetfs.fwk.security.IUserDetailsService;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import javax.servlet.Filter;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static com.qfs.QfsWebUtils.url;
+import static com.qfs.server.cfg.impl.ActivePivotRestServicesConfig.PING_SUFFIX;
+import static com.qfs.server.cfg.impl.ActivePivotRestServicesConfig.REST_API_URL_PREFIX;
 
 /**
  * Generic implementation for security configuration of a server hosting ActivePivot, or Content
@@ -115,10 +107,8 @@ public abstract class SecurityConfig implements ICorsConfig {
 	@Autowired
 	protected IJwtConfig jwtConfig;
 
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
+	@Autowired
+	UserDetailsServiceConfig userDetailsService;
 
 	/**
 	 * Returns the default {@link AuthenticationEntryPoint} to use
@@ -137,8 +127,8 @@ public abstract class SecurityConfig implements ICorsConfig {
 		auth
 				.eraseCredentials(false)
 				// Add an LDAP authentication provider instead of this to support LDAP
-				.userDetailsService(userDetailsService())
-				.passwordEncoder(passwordEncoder()).and()
+				.userDetailsService(userDetailsService.userDetailsService())
+				.passwordEncoder(userDetailsService.passwordEncoder()).and()
 				// Required to allow JWT
 				.authenticationProvider(jwtConfig.jwtAuthenticationProvider());
 	}
@@ -179,33 +169,11 @@ public abstract class SecurityConfig implements ICorsConfig {
 	 */
 	@Bean
 	public IUserDetailsService avUserDetailsService() {
-		return new UserDetailsServiceWrapper(userDetailsService());
+		return new UserDetailsServiceWrapper(userDetailsService.userDetailsService());
 	}
 
-	/**
-	 * [Bean] Create the users that can access the application (noop password encoder)
-	 *
-	 * @return {@link UserDetailsService user data}
-	 */
-	@Bean
-	public UserDetailsService userDetailsService() {
-		InMemoryUserDetailsManagerBuilder b = new InMemoryUserDetailsManagerBuilder()
-				.withUser("admin").password(passwordEncoder().encode("admin")).authorities(ROLE_USER, ROLE_ADMIN, ROLE_CS_ROOT).and()
-				.withUser("user").password(passwordEncoder().encode("user")).authorities(ROLE_USER).and();
-		return new CompositeUserDetailsService(Arrays.asList(b.build(), technicalUserDetailsService()));
-	}
 
-	/**
-	 * Creates a technical user to allow ActivePivot to connect
-	 * to the content server. (noop password encoder)
-	 *
-	 * @return {@link UserDetailsService user data}
-	 */
-	protected UserDetailsManager technicalUserDetailsService() {
-		return new InMemoryUserDetailsManagerBuilder()
-				.withUser("pivot").password(passwordEncoder().encode("pivot")).authorities(ROLE_TECH, ROLE_CS_ROOT).and()
-				.build();
-	}
+
 	
 	/**
 	 * [Bean] Comparator for user roles

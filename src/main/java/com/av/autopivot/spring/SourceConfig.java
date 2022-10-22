@@ -18,41 +18,36 @@
  */
 package com.av.autopivot.spring;
 
-import static com.av.csv.discover.CSVDiscovery.isDate;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.logging.Logger;
-
-import com.activeviam.fwk.ActiveViamRuntimeException;
+import com.av.autopivot.AutoPivotGenerator;
+import com.av.csv.CSVFormat;
+import com.av.csv.calculator.DateDayCalculator;
+import com.av.csv.calculator.DateMonthCalculator;
+import com.av.csv.calculator.DateYearCalculator;
+import com.qfs.msg.IColumnCalculator;
+import com.qfs.msg.csv.ICSVSource;
+import com.qfs.msg.csv.IFileInfo;
+import com.qfs.msg.csv.ILineReader;
+import com.qfs.msg.csv.filesystem.impl.SingleFileCSVTopic;
+import com.qfs.msg.csv.impl.CSVParserConfiguration;
+import com.qfs.msg.csv.impl.CSVSource;
 import com.qfs.msg.csv.impl.CSVSourceConfiguration;
+import com.qfs.platform.IPlatform;
 import com.qfs.server.cfg.IDatastoreConfig;
+import com.qfs.source.impl.CSVMessageChannelFactory;
+import com.qfs.source.impl.Fetch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.env.Environment;
 
-import com.av.autopivot.AutoPivotGenerator;
-import com.av.csv.CSVFormat;
-import com.av.csv.calculator.DateDayCalculator;
-import com.av.csv.calculator.DateMonthCalculator;
-import com.av.csv.calculator.DateYearCalculator;
-import com.av.csv.discover.CSVDiscovery;
-import com.qfs.msg.IColumnCalculator;
-import com.qfs.msg.csv.ICSVSource;
-import com.qfs.msg.csv.ICSVSourceConfiguration;
-import com.qfs.msg.csv.IFileInfo;
-import com.qfs.msg.csv.ILineReader;
-import com.qfs.msg.csv.filesystem.impl.SingleFileCSVTopic;
-import com.qfs.msg.csv.impl.CSVParserConfiguration;
-import com.qfs.msg.csv.impl.CSVSource;
-import com.qfs.platform.IPlatform;
-import com.qfs.source.impl.CSVMessageChannelFactory;
-import com.qfs.source.impl.Fetch;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+
+import static com.av.csv.discover.CSVDiscovery.isDate;
 
 
 /**
@@ -82,56 +77,29 @@ public class SourceConfig {
 	@Autowired
 	protected IDatastoreConfig datastoreConfig;
 
+	@Autowired
+	protected DiscoveryConf discoveryConf;
+
 	/** Create and configure the CSV engine */
 	@Bean
 	public ICSVSource<Path> CSVSource() throws IOException {
 		
 		// Allocate half the the machine cores to CSV parsing
 		Integer parserThreads = Math.min(8, Math.max(1, IPlatform.CURRENT_PLATFORM.getProcessorCount() / 2));
-		LOGGER.info("Allocating " + parserThreads + " parser threads.");
+		LOGGER.info(()->"Allocating " + parserThreads + " parser threads.");
 		
 		CSVSource<Path> source = new CSVSource<Path>();
 		CSVSourceConfiguration.CSVSourceConfigurationBuilder<Path> sourceConfigurationBuilder = new CSVSourceConfiguration.CSVSourceConfigurationBuilder<>();
-		if (null != parserThreads) {
-			sourceConfigurationBuilder.parserThreads(parserThreads);
-		}
+		sourceConfigurationBuilder.parserThreads(parserThreads);
 		final String bufferSize = env.getProperty("csvSource.bufferSize","256");
-		if (null != bufferSize) {
-			sourceConfigurationBuilder.bufferSize(Integer.parseInt(bufferSize));
-		}
+		sourceConfigurationBuilder.bufferSize(Integer.parseInt(bufferSize));
 		source.configure(sourceConfigurationBuilder.build());
 		
 		return source;
 	}
 	
-	/**
-	 * @return charset used by the CSV parsers.
-	 */
-	@Bean
-	public Charset charset() {
-		String charsetName = env.getProperty("charset");
-		if(charsetName != null) {
-			try {
-				return Charset.forName(charsetName);
-			} catch(Exception e) {
-				LOGGER.warning("Unknown charset: " + charsetName);
-			}
-		}
-		return Charset.defaultCharset();
-	}
 
 
-	/** Discover the input data file (CSV separator, column types) */
-	@Bean
-	public CSVFormat discoverFile() {
-		String fileName = env.getRequiredProperty("fileName");
-		try {
-			CSVFormat discovery = new CSVDiscovery().discoverFile(fileName, charset());
-			return discovery;
-		} catch(Exception e) {
-			throw new ActiveViamRuntimeException("Could not discover csv file: " + fileName , e);
-		}
-	}
 
 
 	/**
@@ -141,11 +109,11 @@ public class SourceConfig {
 	@DependsOn(value = "startManager")
 	public Void loadData(ICSVSource<Path> source) throws Exception {
 		
-		CSVFormat discovery = discoverFile();
+		CSVFormat discovery = discoveryConf.discoverFile();
 		
 		// Create parser configuration
 		CSVParserConfiguration configuration = new CSVParserConfiguration(
-				charset(), 
+				discoveryConf.charset(),
 				discovery.getSeparator().charAt(0),
 				discovery.getColumnCount(),
 				true,
