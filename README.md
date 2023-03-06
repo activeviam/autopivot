@@ -24,7 +24,7 @@ Atoti AutoPivot tries to guess what's in the data and do everything automaticall
 
 Here are some entry points to jump into the code, starting from `src/main/java`:
 * `com.av.csv.discover.CSVDiscovery` logic to discover the CSV separator character and the data types of the columns
-* `com.av.autopivot.AutoPivotGenerator` logic to create an ActivePivot cube (hierarchies, aggregates...) based on the file format
+* `com.av.autopivot.AutoPivotGenerator` logic to create an Atoti cube (hierarchies, aggregates...) based on the file format
 * `com.av.autopivot.spring` this package contains the Spring configuration of the AutoPivot application
 * `src/main/resources/application.properties` options of the AutoPivot application
 
