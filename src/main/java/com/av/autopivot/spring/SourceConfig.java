@@ -77,6 +77,14 @@ public class SourceConfig {
 	@Autowired
 	protected Environment env;
 
+	/** Character set */
+	@Autowired
+	protected Charset charset;
+
+	/** CSV Format */
+	@Autowired
+	protected CSVFormat discovery;
+
 	/** Application datastore, automatically wired */
 	@Autowired
 	protected DatastoreConfig datastoreConfig;
@@ -97,35 +105,6 @@ public class SourceConfig {
 		
 		return source;
 	}
-	
-	/**
-	 * @return charset used by the CSV parsers.
-	 */
-	@Bean
-	public Charset charset() {
-		String charsetName = env.getProperty("charset");
-		if(charsetName != null) {
-			try {
-				return Charset.forName(charsetName);
-			} catch(Exception e) {
-				LOGGER.warning("Unknown charset: " + charsetName);
-			}
-		}
-		return Charset.defaultCharset();
-	}
-
-
-	/** Discover the input data file (CSV separator, column types) */
-	@Bean
-	public CSVFormat discoverFile() {
-		String fileName = env.getRequiredProperty("fileName");
-		try {
-			CSVFormat discovery = new CSVDiscovery().discoverFile(fileName, charset());
-			return discovery;
-		} catch(Exception e) {
-			throw new ActiveViamRuntimeException("Could not discover csv file: " + fileName , e);
-		}
-	}
 
 
 	/**
@@ -135,11 +114,9 @@ public class SourceConfig {
 	@DependsOn(value = "startManager")
 	public Void loadData(ICSVSource<Path> source) throws Exception {
 		
-		CSVFormat discovery = discoverFile();
-		
 		// Create parser configuration
 		CSVParserConfiguration configuration = new CSVParserConfiguration(
-				charset(), 
+				charset,
 				discovery.getSeparator().charAt(0),
 				discovery.getColumnCount(),
 				true,

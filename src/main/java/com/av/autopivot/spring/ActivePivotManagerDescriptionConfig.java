@@ -52,18 +52,17 @@ public class ActivePivotManagerDescriptionConfig implements IActivePivotManagerD
 	@Autowired
 	protected Environment env;
 
-	/** Datasource configuration */
+	/** CSV Format */
 	@Autowired
-	protected SourceConfig sourceConfig;
+	protected CSVFormat discovered;
 
 	@Bean
 	@Override
 	public IActivePivotManagerDescription userManagerDescription() {
-		CSVFormat discovery = sourceConfig.discoverFile();
 
 		AutoPivotGenerator generator = generator();
 		IActivePivotManagerDescription manager =
-				generator.createActivePivotManagerDescription(discovery, env);
+				generator.createActivePivotManagerDescription(discovered, env);
 
 		return manager;
 	}
@@ -82,11 +81,10 @@ public class ActivePivotManagerDescriptionConfig implements IActivePivotManagerD
 	@Bean
 	@Override
 	public IDatastoreSchemaDescription userSchemaDescription() {
-		CSVFormat discovery = sourceConfig.discoverFile();
 		AutoPivotGenerator generator = generator();
 
 		final Collection<IStoreDescription> stores = new LinkedList<>();
-		stores.add(generator.createStoreDescription(discovery, env));
+		stores.add(generator.createStoreDescription(discovered, env));
 		return new DatastoreSchemaDescription(stores, Collections.emptyList());
 	}
 
