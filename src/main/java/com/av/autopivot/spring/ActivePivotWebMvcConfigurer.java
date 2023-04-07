@@ -14,19 +14,13 @@ public class ActivePivotWebMvcConfigurer implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/content/ui/env*.js")
-                .addResourceLocations("classpath:/static/content/");
-        registry.addResourceHandler("/ui/env*.js")
-                .addResourceLocations("classpath:/static/activeui/");
+        registry.addResourceHandler("/ui/env*.js").addResourceLocations("classpath:/static/activeui/");
+        registry.addResourceHandler("/admin/ui/env*.js").addResourceLocations("classpath:/static/admin-ui/");
 
-        registerExtensions(registry);
-
-        registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
-    }
-
-    protected void registerExtensions(final ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/ui/extensions*.json")
                 .addResourceLocations("classpath:/static/activeui/");
+
+        registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
     }
 
 }

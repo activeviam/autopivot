@@ -19,23 +19,21 @@
 package com.av.autopivot.spring;
 
 import com.activeviam.fwk.ActiveViamRuntimeException;
+import com.qfs.content.cfg.impl.ContentServerRestServicesConfig;
+import com.qfs.content.service.IContentService;
 import com.qfs.content.service.impl.InMemoryContentService;
 import com.qfs.content.snapshot.impl.ContentServiceSnapshotter;
+import com.qfs.pivot.content.IActivePivotContentService;
+import com.qfs.pivot.content.impl.ActivePivotContentServiceBuilder;
+import com.qfs.server.cfg.content.IActivePivotContentServiceConfig;
 import com.qfs.util.impl.QfsFiles;
 import com.quartetfs.biz.pivot.context.IContextValue;
 import com.quartetfs.biz.pivot.definitions.ICalculatedMemberDescription;
 import com.quartetfs.biz.pivot.definitions.IKpiDescription;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import com.qfs.content.cfg.impl.ContentServerRestServicesConfig;
-import com.qfs.content.service.IContentService;
-import com.qfs.pivot.content.IActivePivotContentService;
-import com.qfs.pivot.content.impl.ActivePivotContentServiceBuilder;
-import com.qfs.server.cfg.content.IActivePivotContentServiceConfig;
-
-import org.slf4j.Logger;
 
 /**
  * Spring configuration of the <b>Content Service</b> backed by a local <b>Content Server</b>.
@@ -48,11 +46,12 @@ import org.slf4j.Logger;
 public class ContentServiceConfig implements IActivePivotContentServiceConfig {
 
 	private static final Logger logger = LoggerFactory.getLogger(ContentServiceConfig.class);
+
 	/** Role needed to create calculated members */
-	private static final String CALCULATED_MEMBER_ROLE = SecurityConfig.ROLE_USER;
+	private static final String CALCULATED_MEMBER_ROLE = RolesConfig.ROLE_USER;
 
 	/** Role needed to create KPIs */
-	private static final String KPI_ROLE = SecurityConfig.ROLE_USER;
+	private static final String KPI_ROLE = RolesConfig.ROLE_USER;
 
 
 	/**

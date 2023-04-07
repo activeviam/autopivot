@@ -16,14 +16,20 @@
 	</licenses>
 
 	<properties>
-		<activepivot.version>5.11.6</activepivot.version>
+		<activepivot.version>6.0.3</activepivot.version>
 		<activeui.version>5.1.2</activeui.version>
-		<spring.boot.version>2.5.14</spring.boot.version>
+        <adminui.version>5.1.1</adminui.version>
+		<spring.boot.version>2.7.10</spring.boot.version>
 	</properties>
 
 	<dependencies>
 
 		<!-- Spring Boot Dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+            <version>${spring.boot.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -55,11 +61,21 @@
         </dependency>
 
 		<!-- ActiveUI Dependencies -->
-		<dependency>
-			<groupId>com.activeviam.activeui</groupId>
-			<artifactId>activeui</artifactId>
-			<version>${activeui.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>com.activeviam.activeui</groupId>
+            <artifactId>activeui</artifactId>
+            <version>${activeui.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.activeviam.activeui</groupId>
+            <artifactId>activeui-initial-content</artifactId>
+            <version>${activeui.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.activeviam.tech</groupId>
+            <artifactId>admin-ui</artifactId>
+            <version>${adminui.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -80,7 +96,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.11.0</version>
                 <configuration>
                     <source>11</source>
                     <target>11</target>

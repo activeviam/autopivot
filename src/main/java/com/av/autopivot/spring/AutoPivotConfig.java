@@ -18,14 +18,13 @@
  */
 package com.av.autopivot.spring;
 
-import com.av.export.DatastoreExportService;
 import com.qfs.content.cfg.impl.ContentServerWebSocketServicesConfig;
 import com.qfs.pivot.content.impl.DynamicActivePivotContentServiceMBean;
 import com.qfs.server.cfg.IActivePivotConfig;
 import com.qfs.server.cfg.IDatastoreConfig;
 import com.qfs.server.cfg.content.IActivePivotContentServiceConfig;
 import com.qfs.server.cfg.impl.*;
-import com.qfs.service.store.impl.NoSecurityDatastoreServiceConfig;
+import com.qfs.service.store.impl.NoSecurityDatabaseServiceConfig;
 import com.quartetfs.fwk.Registry;
 import com.quartetfs.fwk.contributions.impl.ClasspathContributionProvider;
 import com.quartetfs.fwk.monitoring.jmx.impl.JMXEnabler;
@@ -66,11 +65,10 @@ import java.util.logging.Logger;
 @Configuration
 @Import(
 value = {
-		ActivePivotConfig.class,
-		DatastoreConfig.class,
-		NoSecurityDatastoreServiceConfig.class,
+		ActivePivotWithDatastoreConfig.class,
 		FullAccessBranchPermissionsManagerConfig.class,
 		JwtConfig.class,
+		NoSecurityDatabaseServiceConfig.class,
 	
 		// ActiveViam Services
 		ActivePivotServicesConfig.class,
@@ -86,15 +84,6 @@ value = {
 		// Monitoring for the Streaming services
 		StreamingMonitorConfig.class,
 
-		ActivePivotManagerDescriptionConfig.class,
-		ContentServiceConfig.class,
-		SourceConfig.class,
-		SecurityConfig.class,
-
-		// ActiveUI resource server configuration
-		ActiveUIResourceServerConfig.class,
-		CustomI18nConfig.class,
-		ActivePivotWebMvcConfigurer.class
 })
 public class AutoPivotConfig {
 
@@ -105,10 +94,6 @@ public class AutoPivotConfig {
 	static {
 		Registry.setContributionProvider(new ClasspathContributionProvider("com.av", "com.qfs", "com.quartetfs"));
 	}
-
-	/** Spring environment, automatically wired */
-	@Autowired
-	protected Environment env;
 
 	/** Datastore spring configuration */
 	@Autowired
@@ -127,16 +112,11 @@ public class AutoPivotConfig {
 	 * Initialize and start the ActivePivot Manager, after performing all the injections into the
 	 * ActivePivot plug-ins.
 	 *
-	 * @see #apManagerInitPrerequisitePluginInjections()
 	 * @return void
 	 * @throws Exception any exception that occurred during the manager's start up
 	 */
 	@Bean
 	public Void startManager() throws Exception {
-		/* ********************************************************************** */
-		/* Inject dependencies before the ActivePivot components are initialized. */
-		/* ********************************************************************** */
-		apManagerInitPrerequisitePluginInjections();
 
 		/* *********************************************** */
 		/* Initialize the ActivePivot Manager and start it */
@@ -155,7 +135,7 @@ public class AutoPivotConfig {
 	 */
 	@Bean
 	public JMXEnabler JMXDatastoreEnabler() {
-		return new JMXEnabler(datastoreConfig.datastore());
+		return new JMXEnabler(datastoreConfig.database());
 	}
 
 	/**
@@ -181,26 +161,6 @@ public class AutoPivotConfig {
 				new DynamicActivePivotContentServiceMBean(
 						apCSConfig.activePivotContentService(),
 						apConfig.activePivotManager()));
-	}
-	
-	/**
-	 * Export a datastore export service through JMX
-	 *
-	 * @return the {@link JMXEnabler} attached to the datastore export service
-	 */
-	@Bean
-	public JMXEnabler JMXDatastoreExportService() {
-		return new JMXEnabler(new DatastoreExportService(datastoreConfig.datastore()));
-	}
-
-	/**
-	 * Extended plugin injections that are required before doing the startup of the ActivePivot
-	 * manager.
-	 *
-	 * @see #startManager()
-	 * @throws Exception any exception that occurred during the injection
-	 */
-	protected void apManagerInitPrerequisitePluginInjections() throws Exception {
 	}
 
 }

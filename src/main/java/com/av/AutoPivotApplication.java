@@ -37,16 +37,23 @@ public class AutoPivotApplication {
         SpringApplication.run(AutoPivotApplication.class, args);
     }
 
+
     /**
-     * Special beans to make AP work in SpringBoot
-     * https://github.com/spring-projects/spring-boot/issues/15373
+     * Provides a customized {@link DispatcherServletRegistrationBean} with a specific servlet path.
+     * <p>
+     * This bean is required to make Atoti work in SpringBoot; see :
+     * {@linkplain "https://github.com/spring-projects/spring-boot/issues/15373"}
+     *
+     * @param dispatcherServlet the dispatcher servlet
+     * @param multipartConfig the dispatcher servlet properties
+     * @return a customized {@link DispatcherServletRegistrationBean}
      */
     @Bean
     public DispatcherServletRegistrationBean dispatcherServletRegistration(
-            DispatcherServlet dispatcherServlet,
-            ObjectProvider<MultipartConfigElement> multipartConfig) {
-        DispatcherServletRegistrationBean registration = new DispatcherServletRegistrationBean(
-                dispatcherServlet, "/*");
+            final DispatcherServlet dispatcherServlet,
+            final ObjectProvider<MultipartConfigElement> multipartConfig) {
+        final DispatcherServletRegistrationBean registration =
+                new DispatcherServletRegistrationBean(dispatcherServlet, "/*");
         registration.setName("springDispatcherServlet");
         registration.setLoadOnStartup(1);
         multipartConfig.ifAvailable(registration::setMultipartConfig);

@@ -18,12 +18,11 @@
  */
 package com.av.autopivot.spring;
 
-import java.util.Set;
-
-import org.springframework.context.annotation.Configuration;
-
 import com.qfs.server.cfg.impl.ASpringResourceServerConfig;
 import com.qfs.util.impl.QfsArrays;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.Set;
 
 /**
  * Spring configuration for ActiveUI web application
@@ -93,7 +92,7 @@ public class ActiveUIResourceServerConfig extends ASpringResourceServerConfig {
 		// You can read more about this feature here
 		// https://support.activeviam.com/documentation/activeui/4.2.0/dev/setup/maven-integration.html
 
-		return QfsArrays.mutableSet(
+		return Set.of(
 				"/activeui/", // index.html, favicon.ico, etc.
 				"classpath:META-INF/resources/webjars/activeui/"); // ActiveUI assets
 	}

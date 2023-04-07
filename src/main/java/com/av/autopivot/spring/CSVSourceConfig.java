@@ -18,28 +18,11 @@
  */
 package com.av.autopivot.spring;
 
-import static com.av.csv.discover.CSVDiscovery.isDate;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.logging.Logger;
-
-import com.activeviam.fwk.ActiveViamRuntimeException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.core.env.Environment;
-
 import com.av.autopivot.AutoPivotGenerator;
 import com.av.csv.CSVFormat;
 import com.av.csv.calculator.DateDayCalculator;
 import com.av.csv.calculator.DateMonthCalculator;
 import com.av.csv.calculator.DateYearCalculator;
-import com.av.csv.discover.CSVDiscovery;
 import com.qfs.msg.IColumnCalculator;
 import com.qfs.msg.csv.ICSVSource;
 import com.qfs.msg.csv.ICSVSourceConfiguration;
@@ -49,9 +32,24 @@ import com.qfs.msg.csv.filesystem.impl.SingleFileCSVTopic;
 import com.qfs.msg.csv.impl.CSVParserConfiguration;
 import com.qfs.msg.csv.impl.CSVSource;
 import com.qfs.platform.IPlatform;
-import com.qfs.server.cfg.impl.DatastoreConfig;
+import com.qfs.server.cfg.IDatastoreConfig;
 import com.qfs.source.impl.CSVMessageChannelFactory;
 import com.qfs.source.impl.Fetch;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.core.env.Environment;
+
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+
+import static com.av.csv.discover.CSVDiscovery.isDate;
+import static com.qfs.msg.csv.impl.CSVSourceConfiguration.CSVSourceConfigurationBuilder;
 
 
 /**
@@ -64,10 +62,10 @@ import com.qfs.source.impl.Fetch;
  *
  */
 @Configuration
-public class SourceConfig {
+public class CSVSourceConfig {
 
 	/** Logger **/
-	protected static Logger LOGGER = Logger.getLogger(SourceConfig.class.getName());
+	protected static Logger LOGGER = Logger.getLogger(CSVSourceConfig.class.getName());
 
 	/** Property to identify the name of the file to load */
 	public static final String FILENAME_PROPERTY = "fileName";
@@ -87,7 +85,7 @@ public class SourceConfig {
 
 	/** Application datastore, automatically wired */
 	@Autowired
-	protected DatastoreConfig datastoreConfig;
+	protected IDatastoreConfig datastoreConfig;
 
 	/** Create and configure the CSV engine */
 	@Bean
@@ -98,10 +96,13 @@ public class SourceConfig {
 		LOGGER.info("Allocating " + parserThreads + " parser threads.");
 		
 		CSVSource<Path> source = new CSVSource<Path>();
-		Properties properties = new Properties();
-		properties.put(ICSVSourceConfiguration.BUFFER_SIZE_PROPERTY, "256");
-		properties.put(ICSVSourceConfiguration.PARSER_THREAD_PROPERTY, parserThreads.toString());
-		source.configure(properties);
+
+		ICSVSourceConfiguration conf =
+				new CSVSourceConfigurationBuilder<Path>()
+						.bufferSize(256)
+						.parserThreads(parserThreads)
+						.build();
+		source.configure(conf);
 		
 		return source;
 	}
@@ -129,7 +130,7 @@ public class SourceConfig {
 		SingleFileCSVTopic topic = new SingleFileCSVTopic(AutoPivotGenerator.BASE_STORE, configuration, fileName, 1000);
 		source.addTopic(topic);
 		
-		CSVMessageChannelFactory<Path> channelFactory = new CSVMessageChannelFactory<>(source, datastoreConfig.datastore());
+		CSVMessageChannelFactory<Path> channelFactory = new CSVMessageChannelFactory<>(source, datastoreConfig.database());
 		
 		// Derive calculated columns
 		List<IColumnCalculator<ILineReader>> calculatedColumns = new ArrayList<IColumnCalculator<ILineReader>>();

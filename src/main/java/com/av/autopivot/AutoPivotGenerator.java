@@ -28,14 +28,16 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import com.activeviam.database.api.query.AliasedField;
 import com.qfs.chunk.impl.Chunks;
 import com.qfs.desc.*;
 import com.qfs.pivot.cube.provider.multi.IMultipleAggregateProvider;
+import com.qfs.store.part.INumaSelectorDescription;
+import com.quartetfs.biz.pivot.definitions.*;
 import com.quartetfs.biz.pivot.postprocessing.IPostProcessorConstants;
 import org.springframework.core.env.Environment;
 
 import com.av.csv.CSVFormat;
-import com.qfs.desc.IOptimizationDescription.Optimization;
 import com.qfs.desc.impl.FieldDescription;
 import com.qfs.desc.impl.OptimizationDescription;
 import com.qfs.desc.impl.StoreDescription;
@@ -43,24 +45,10 @@ import com.qfs.platform.IPlatform;
 import com.qfs.store.part.IPartitioningDescription;
 import com.qfs.store.part.impl.ModuloFunctionDescription;
 import com.qfs.store.part.impl.PartitioningDescriptionBuilder;
-import com.qfs.store.selection.impl.SelectionField;
 import com.qfs.util.impl.QfsArrays;
 import com.quartetfs.biz.pivot.cube.dimension.IDimension.DimensionType;
 import com.quartetfs.biz.pivot.cube.hierarchy.ILevelInfo.LevelType;
 import com.quartetfs.biz.pivot.cube.hierarchy.measures.IMeasureHierarchy;
-import com.quartetfs.biz.pivot.definitions.IActivePivotDescription;
-import com.quartetfs.biz.pivot.definitions.IActivePivotInstanceDescription;
-import com.quartetfs.biz.pivot.definitions.IActivePivotManagerDescription;
-import com.quartetfs.biz.pivot.definitions.IActivePivotSchemaDescription;
-import com.quartetfs.biz.pivot.definitions.IActivePivotSchemaInstanceDescription;
-import com.quartetfs.biz.pivot.definitions.IAggregateProviderDefinition;
-import com.quartetfs.biz.pivot.definitions.IAggregatedMeasureDescription;
-import com.quartetfs.biz.pivot.definitions.IAggregatesCacheDescription;
-import com.quartetfs.biz.pivot.definitions.IAxisHierarchyDescription;
-import com.quartetfs.biz.pivot.definitions.IAxisLevelDescription;
-import com.quartetfs.biz.pivot.definitions.ICatalogDescription;
-import com.quartetfs.biz.pivot.definitions.INativeMeasureDescription;
-import com.quartetfs.biz.pivot.definitions.IPostProcessorDescription;
 import com.quartetfs.biz.pivot.definitions.impl.ActivePivotDescription;
 import com.quartetfs.biz.pivot.definitions.impl.ActivePivotInstanceDescription;
 import com.quartetfs.biz.pivot.definitions.impl.ActivePivotManagerDescription;
@@ -151,7 +139,7 @@ public class AutoPivotGenerator {
 					(IDuplicateKeyHandler)null,
 					(IStoreDescriptionBuilder.IRemoveUnknownKeyListener)null,
 					(Properties)null,
-					(INumaSelectorDescription)null,
+					(INumaSelectorDescription) null,
 					false);
 
 		return desc;
@@ -244,7 +232,7 @@ public class AutoPivotGenerator {
 			if(!numericsOnly.contains(fieldType)) {
 				AxisDimensionDescription dimension = new AxisDimensionDescription(fieldName);
 				IAxisHierarchyDescription h = new AxisHierarchyDescription(fieldName);
-				IAxisLevelDescription l = new AxisLevelDescription(fieldName);
+				IAxisLevelDescription l = new AxisLevelDescription(fieldName, fieldName);
 				h.getLevels().add(l);
 				dimension.getHierarchies().add(h);
 				dimensions.addValues(Arrays.asList(dimension));
@@ -253,10 +241,10 @@ public class AutoPivotGenerator {
 				if(isDate(fieldType)) {
 					dimension.setDimensionType(DimensionType.TIME);
 					
-					List<IAxisHierarchyDescription> hierarchies = new ArrayList<>();
+					List<IHierarchyDescription> hierarchies = new ArrayList<>();
 					IAxisHierarchyDescription hierarchy = new AxisHierarchyDescription(fieldName);
 					hierarchy.setDefaultHierarchy(true);
-					IAxisLevelDescription dateLevel = new AxisLevelDescription(fieldName);
+					IAxisLevelDescription dateLevel = new AxisLevelDescription(fieldName, fieldName);
 					dateLevel.setLevelType(LevelType.TIME);
 					hierarchy.setLevels(Arrays.asList(dateLevel));
 					hierarchies.add(hierarchy);
@@ -399,16 +387,16 @@ public class AutoPivotGenerator {
 		ActivePivotSchemaDescription desc = new ActivePivotSchemaDescription();
 
 		// Datastore selection
-		List<SelectionField> fields = new ArrayList<>();
+		List<AliasedField> fields = new ArrayList<>();
 		for(int f = 0; f < format.getColumnCount(); f++) {
 			String fieldName = format.getColumnName(f);
 			String fieldType = format.getColumnType(f);
-			fields.add(new SelectionField(fieldName));
+			fields.add(AliasedField.fromFieldName(fieldName));
 			
 			if(isDate(fieldType)) {
-				fields.add(new SelectionField(fieldName + ".YEAR"));
-				fields.add(new SelectionField(fieldName + ".MONTH"));
-				fields.add(new SelectionField(fieldName + ".DAY"));
+				fields.add(AliasedField.fromFieldName((fieldName + ".YEAR")));
+				fields.add(AliasedField.fromFieldName((fieldName + ".MONTH")));
+				fields.add(AliasedField.fromFieldName((fieldName + ".DAY")));
 			}
 		}
 		SelectionDescription selection = new SelectionDescription(BASE_STORE, fields);
@@ -417,7 +405,7 @@ public class AutoPivotGenerator {
 		IActivePivotDescription pivot = createActivePivotDescription(format, env);
 		IActivePivotInstanceDescription instance = new ActivePivotInstanceDescription(PIVOT, pivot);
 		
-		desc.setDatastoreSelection(selection);
+		desc.setDatabaseSelection(selection);
 		desc.setActivePivotInstanceDescriptions(Collections.singletonList(instance));
 		
 		return desc;

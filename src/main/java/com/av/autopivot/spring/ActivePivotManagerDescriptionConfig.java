@@ -18,22 +18,14 @@
  */
 package com.av.autopivot.spring;
 
-import com.qfs.desc.IDatastoreSchemaDescription;
-import com.qfs.desc.IStoreDescription;
-import com.qfs.desc.impl.DatastoreSchemaDescription;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
-
 import com.av.autopivot.AutoPivotGenerator;
 import com.av.csv.CSVFormat;
 import com.qfs.server.cfg.IActivePivotManagerDescriptionConfig;
 import com.quartetfs.biz.pivot.definitions.IActivePivotManagerDescription;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 /**
  * 
@@ -56,36 +48,18 @@ public class ActivePivotManagerDescriptionConfig implements IActivePivotManagerD
 	@Autowired
 	protected CSVFormat discovered;
 
+	/** AutoPivot Generator */
+	@Autowired
+	protected AutoPivotGenerator generator;
+
 	@Bean
 	@Override
-	public IActivePivotManagerDescription userManagerDescription() {
+	public IActivePivotManagerDescription managerDescription() {
 
-		AutoPivotGenerator generator = generator();
 		IActivePivotManagerDescription manager =
 				generator.createActivePivotManagerDescription(discovered, env);
 
 		return manager;
-	}
-
-	/**
-	 *
-	 * Generator of store and cube descriptions.
-	 *
-	 * @return ActivePivot generator
-	 */
-	@Bean
-	public AutoPivotGenerator generator() {
-		return new AutoPivotGenerator();
-	}
-
-	@Bean
-	@Override
-	public IDatastoreSchemaDescription userSchemaDescription() {
-		AutoPivotGenerator generator = generator();
-
-		final Collection<IStoreDescription> stores = new LinkedList<>();
-		stores.add(generator.createStoreDescription(discovered, env));
-		return new DatastoreSchemaDescription(stores, Collections.emptyList());
 	}
 
 }

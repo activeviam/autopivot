@@ -59,8 +59,7 @@ public class CookieUtil {
 		// the tokens
 		String expiration = QfsProperties.loadProperties("jwt.properties").getProperty(JwtConfig.EXPIRATION_PROPERTY);
 
-		int maxAge = null != expiration ? Integer.parseInt(expiration)
-				: JwtConfig.DEFAULT_EXPIRATION;
+		int maxAge = null != expiration ? Integer.parseInt(expiration) : JwtConfig.DEFAULT_EXPIRATION;
 		config.setMaxAge(maxAge);
 	}
 
