@@ -36,6 +36,7 @@ import com.qfs.server.cfg.IDatastoreConfig;
 import com.qfs.source.impl.CSVMessageChannelFactory;
 import com.qfs.source.impl.Fetch;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -75,6 +76,10 @@ public class CSVSourceConfig {
 	@Autowired
 	protected Environment env;
 
+	/** Spring Application Context */
+	@Autowired
+	ApplicationContext context;
+
 	/** Character set */
 	@Autowired
 	protected Charset charset;
@@ -109,12 +114,15 @@ public class CSVSourceConfig {
 
 
 	/**
-	 * Load the CSV file
+	 * Load the CSV file.
+	 *
+	 * To be called once when the application is initialized.
+	 *
 	 */
-	@Bean
-	@DependsOn(value = "startManager")
-	public Void loadData(ICSVSource<Path> source) throws Exception {
-		
+	public void loadData() throws Exception {
+
+		ICSVSource<Path> source = context.getBean(ICSVSource.class);
+
 		// Create parser configuration
 		CSVParserConfiguration configuration = new CSVParserConfiguration(
 				charset,
@@ -154,8 +162,6 @@ public class CSVSourceConfig {
 		fetch.fetch(source);
 		
 		LOGGER.info("AutoPivot initial loading complete.");
-		
-		return null; // Void
 	}
 	
 }

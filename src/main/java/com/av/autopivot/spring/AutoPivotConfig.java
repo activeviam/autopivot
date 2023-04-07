@@ -18,18 +18,23 @@
  */
 package com.av.autopivot.spring;
 
+import com.activeviam.database.api.IDatabase;
 import com.qfs.content.cfg.impl.ContentServerWebSocketServicesConfig;
+import com.qfs.pivot.content.IActivePivotContentService;
 import com.qfs.pivot.content.impl.DynamicActivePivotContentServiceMBean;
-import com.qfs.server.cfg.IActivePivotConfig;
-import com.qfs.server.cfg.IDatastoreConfig;
-import com.qfs.server.cfg.content.IActivePivotContentServiceConfig;
 import com.qfs.server.cfg.impl.*;
 import com.qfs.service.store.impl.NoSecurityDatabaseServiceConfig;
+import com.quartetfs.biz.pivot.IActivePivotManager;
+import com.quartetfs.biz.pivot.monitoring.impl.DynamicActivePivotManagerMBean;
 import com.quartetfs.fwk.Registry;
 import com.quartetfs.fwk.contributions.impl.ClasspathContributionProvider;
 import com.quartetfs.fwk.monitoring.jmx.impl.JMXEnabler;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
@@ -85,7 +90,7 @@ value = {
 		StreamingMonitorConfig.class,
 
 })
-public class AutoPivotConfig {
+public class AutoPivotConfig implements InitializingBean {
 
 	/** Logger **/
 	protected static Logger LOGGER = Logger.getLogger(AutoPivotConfig.class.getName());
@@ -95,47 +100,31 @@ public class AutoPivotConfig {
 		Registry.setContributionProvider(new ClasspathContributionProvider("com.av", "com.qfs", "com.quartetfs"));
 	}
 
-	/** Datastore spring configuration */
+	/** Database of the Atoti application */
 	@Autowired
-	protected IDatastoreConfig datastoreConfig;
+	protected IDatabase database;
 
-	/** ActivePivot spring configuration */
+	/** ActivePivot Manager */
 	@Autowired
-	protected IActivePivotConfig apConfig;
+	protected IActivePivotManager activePivotManager;
 
-	/** ActivePivot content service spring configuration */
+	/** ActivePivot content service */
 	@Autowired
-	protected IActivePivotContentServiceConfig apCSConfig;
+	protected IActivePivotContentService contentService;
+
+	/** CSV Source configuration */
+	@Autowired
+	protected CSVSourceConfig sourceConfig;
+
 
 	/**
+	 * Enable JMX Monitoring for the Database
 	 *
-	 * Initialize and start the ActivePivot Manager, after performing all the injections into the
-	 * ActivePivot plug-ins.
-	 *
-	 * @return void
-	 * @throws Exception any exception that occurred during the manager's start up
-	 */
-	@Bean
-	public Void startManager() throws Exception {
-
-		/* *********************************************** */
-		/* Initialize the ActivePivot Manager and start it */
-		/* *********************************************** */
-
-		apConfig.activePivotManager().init(null);
-		apConfig.activePivotManager().start();
-
-		return null;
-	}
-
-	/**
-	 * Enable JMX Monitoring for the Datastore
-	 *
-	 * @return the {@link JMXEnabler} attached to the datastore
+	 * @return the {@link JMXEnabler} attached to the database
 	 */
 	@Bean
 	public JMXEnabler JMXDatastoreEnabler() {
-		return new JMXEnabler(datastoreConfig.database());
+		return new JMXEnabler(database);
 	}
 
 	/**
@@ -144,9 +133,8 @@ public class AutoPivotConfig {
 	 * @return the {@link JMXEnabler} attached to the activePivotManager
 	 */
 	@Bean
-	@DependsOn(value = "startManager")
 	public JMXEnabler JMXActivePivotEnabler() {
-		return new JMXEnabler(apConfig.activePivotManager());
+		return new JMXEnabler(new DynamicActivePivotManagerMBean(activePivotManager));
 	}
 
 	/**
@@ -158,9 +146,28 @@ public class AutoPivotConfig {
 	public JMXEnabler JMXActivePivotContentServiceEnabler() {
 		// to allow operations from the JMX bean
 		return new JMXEnabler(
-				new DynamicActivePivotContentServiceMBean(
-						apCSConfig.activePivotContentService(),
-						apConfig.activePivotManager()));
+				new DynamicActivePivotContentServiceMBean(contentService, activePivotManager));
 	}
 
+	/**
+	 *
+	 * Once the Spring Application Context is initialized,
+	 * start the ActivePivot Manager.
+	 *
+	 * @throws Exception any exception that occurred during the manager's start up
+	 */
+	@Override
+	public void afterPropertiesSet() throws Exception {
+
+		/* **********************************************/
+		/* Initialize and start the ActivePivot Manager */
+		/* ******************************************** */
+
+		activePivotManager.init(null);
+		activePivotManager.start();
+
+		/* Start the CSV Source and load data */
+		sourceConfig.loadData();
+
+	}
 }
