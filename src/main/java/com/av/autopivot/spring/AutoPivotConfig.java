@@ -31,6 +31,8 @@ import com.quartetfs.fwk.contributions.impl.ClasspathContributionProvider;
 import com.quartetfs.fwk.monitoring.jmx.impl.JMXEnabler;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -90,7 +92,7 @@ value = {
 		StreamingMonitorConfig.class,
 
 })
-public class AutoPivotConfig implements InitializingBean {
+public class AutoPivotConfig implements ApplicationRunner {
 
 	/** Logger **/
 	protected static Logger LOGGER = Logger.getLogger(AutoPivotConfig.class.getName());
@@ -151,14 +153,13 @@ public class AutoPivotConfig implements InitializingBean {
 
 	/**
 	 *
-	 * Once the Spring Application Context is initialized,
-	 * start the ActivePivot Manager.
+	 * Once the AutoPivot Spring Application is configured
+	 * start the ActivePivot Manager and load the data.
 	 *
 	 * @throws Exception any exception that occurred during the manager's start up
 	 */
 	@Override
-	public void afterPropertiesSet() throws Exception {
-
+	public void run(ApplicationArguments args) throws Exception {
 		/* **********************************************/
 		/* Initialize and start the ActivePivot Manager */
 		/* ******************************************** */
@@ -168,6 +169,6 @@ public class AutoPivotConfig implements InitializingBean {
 
 		/* Start the CSV Source and load data */
 		sourceConfig.loadData();
-
 	}
+
 }
